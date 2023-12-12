@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 0;
+            border: none;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+<form>
+    <div>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">Sr.No</th>
+                    <th style="width: 20%;">Part Name</th>
+                    <th style="width: 20%;">Customer Name</th>
+                    <th style="width: 20%;">Part Model</th>
+                    <th style="width: 20%;">Part No</th>
+                    <th style="width: 5%;">Check Box</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody-1"></tbody>
+        </table><br>
+        <button onclick="addRow('item-1', 6)">Add New</button>
+    </div>
+</form>
+
+<script>
+    function addRow(itemClassName, numColumns) {
+        var tableBody = document.querySelector('#tableBody-' + itemClassName.charAt(itemClassName.length - 1));
+        var newRow = tableBody.insertRow(tableBody.rows.length);
+
+        // Add Serial Number in the first column
+        var serialCell = newRow.insertCell(0);
+        serialCell.textContent = tableBody.rows.length; // Assuming that the table starts from 1
+
+        // Add data cells (input type text)
+        for (var i = 1; i < numColumns - 1; i++) {
+            var cell = newRow.insertCell(i);
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.style.width = '100%';
+            input.style.padding = '0'; // Set padding to 0
+            input.style.border = 'none'; // Remove border
+            input.style.outline = 'none'; // Remove outline
+            cell.appendChild(input);
+        }
+
+        // Add checkbox in the last column
+        var checkboxCell = newRow.insertCell(numColumns - 1);
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkboxCell.appendChild(checkbox);
+    }
+</script>
+
+</body>
+</html>

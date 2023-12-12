@@ -1,0 +1,290 @@
+{% extends 'app/layouts/main.html' %}
+{% block title %}
+Tracability
+{% endblock title %}
+{% block content %}
+<style>
+  
+.box-0{
+    width: 800px;
+    height:50px;
+    margin-left:380px ;
+    margin-top: 50px;
+    background-color: orange;
+    border: 2px solid black;
+    font-family:Arial, Helvetica, sans-serif
+}
+
+.box {
+    width: 800px;
+    height: 400px;
+    margin-left:380px ;
+    margin-top: -400px;
+    background-color: white;
+    border: 2px solid black;
+  }
+  
+  .box-1 {
+    width: 250px;
+    height: 400px;
+    margin-top:20px;
+    margin-left: 100px;
+    background-color: white;
+    border: 2px solid black;
+    padding-top: 50px;
+    padding-left: 5px;
+  }
+
+  .inner-box-1,.inner-box-2,.inner-box-3,.inner-box-4,.inner-box-5{
+    width: 230px; 
+    height: 50px;
+    background-color:lightblue; 
+    border: 2px solid black; 
+    margin: 5px;
+    padding-top: 10px;
+    cursor: pointer;
+    text-align: center;
+    justify-content: center;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+
+.item-1, .item-2, .item-3, .item-4, .item-5{
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s; 
+  }
+
+ 
+  #save-btn{
+    background-color: green;
+    color: white;
+    height: 50px;
+    width: 200px;
+    margin-top: 20px;
+    margin-left: 100px;
+  }
+  #delete-btn{
+    background-color: red;
+    color: white;
+    height: 50px;
+    width: 200px;
+    margin-top: 20px;
+    margin-left: 450px;
+  }
+  #cancel-btn{
+    background-color: orange;
+    color:black;
+    margin-top: 15px;
+    height: 50px;
+    width: 200px;
+    margin-left: 100px;
+   
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .inner-box:hover {
+      background-color: #f11a1a;
+    }
+
+</style>
+
+<div class="box-0">
+  <center style="color:black;text-shadow: 2px 2px 4px white;">
+    <h1><b>Tracability</b></h1></center>
+</div>
+
+<div class="box-1">
+  <div id="part" class="inner-box-1" onclick="enlargeItem(1),showItem('item-1')"><h4><b>Part</b></h4></div>
+  <div id="batchNumber" class="inner-box-2" onclick="enlargeItem(2),showItem('item-2')"><h4><b>Batch Number</b></h4></div>
+  <div id="machine" class="inner-box-3" onclick="enlargeItem(3),showItem('item-3')"><h4><b>Machine</b></h4></div>
+  <div id="operator" class="inner-box-4" onclick="enlargeItem(4),showItem('item-4')"><h4><b>Operator</b></h4></div>
+  <div id="vendorCode" class="inner-box-5" onclick="enlargeItem(5),showItem('item-5')"><h4><b>Vendor Code</b></h4></div>
+
+</div>
+<div class="box" id="boxContent"style="overflow-x: auto;overflow-y:auto;">
+  <div class="item item-1">
+    <form>
+    <table border="1">
+      <thead>
+        <tr>
+          <th style="width: 5%;">Sr.No</th>
+          <th style="width: 20%;">Part Name</th>
+          <th style="width: 20%;">Customer Name</th>
+          <th style="width: 20%;">Part Model</th>
+          <th style="width: 20%;">Part No</th>
+          <th style="width: 5%;">Check Box</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-1"></tbody>
+    </table><br>
+    <button onclick="addRow('item-1', 6)">Add New</button>
+  </div></form>
+
+  <div class="item item-2">
+    <table border="1">
+      <thead>
+        <tr>
+          <th style="width: 5%;">Sr.No</th>
+          <th style="width: 20%;">Batch No</th>
+          <th style="width: 5%;">Check Box</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-2"></tbody>
+    </table><br>
+    <button onclick="addRow('item-2', 3)">Add New</button>
+  </div>
+
+  <div class="item item-3">
+    <table border="1">
+      <thead>
+        <tr>
+          <th style="width: 5%;">Sr.No</th>
+          <th style="width: 20%;">Machine No</th>
+          <th style="width: 20%;">Machine Name</th>
+          <th style="width: 5%;">Check Box</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-3"></tbody>
+    </table><br>
+    <button onclick="addRow('item-3', 4)">Add New</button>
+  </div>
+
+  <div class="item item-4">
+    <table border="1">
+      <thead>
+        <tr>
+          <th style="width: 5%;">Sr.No</th>
+          <th style="width: 20%;">Operator No</th>
+          <th style="width: 20%;">Operator Name</th>
+          <th style="width: 5%;">Check Box</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-4"></tbody>
+    </table><br>
+    <button onclick="addRow('item-4', 4)">Add New</button>
+  </div>
+
+  <div class="item item-5">
+    <table border="1">
+      <thead>
+        <tr>
+          <th style="width: 5%;">Sr.No</th>
+          <th style="width: 25%;">Vendor Code</th>
+          <th style="width: 25%;">Email</th>
+          <th style="width: 5%;">Check Box</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-5"></tbody>
+    </table><br>
+    <button onclick="addRow('item-5', 4)">Add New</button>
+  </div>
+</div>
+
+<button type="button" id="delete-btn"><b> Delete</b></button>
+<button type="button" id="save-btn"><b>Save</b></button>
+<a href="{% url 'index' %}" >
+  <button type="button" id="cancel-btn"><b>Cancel</b></button>
+</a>
+
+<script>
+
+ function enlargeItem(index) {
+    // Remove 'enlarged' class and reset background color for all inner-boxes
+    document.querySelectorAll('.box-1 > div').forEach(function (el) {
+      el.style.backgroundColor = ''; 
+    });
+    var clickedInnerBox = document.querySelector(`.box-1 .inner-box-${index}`);
+    clickedInnerBox.style.backgroundColor = 'red'; // Set background color to red
+  }
+
+
+
+    window.onload = function() {
+          showItem('item-1');
+        };
+
+
+    function showItem(itemClassName) {
+    var itemClasses = document.querySelectorAll('.item');
+    itemClasses.forEach(function (item) {
+      item.style.display = 'none';
+    });
+
+    var selectedItem = document.querySelector('.' + itemClassName);
+    if (selectedItem) {
+      selectedItem.style.display = 'block';
+    }
+  }
+
+
+  function addRow(itemClassName, numColumns) {
+  var tableBody = document.querySelector('#tableBody-' + itemClassName.charAt(itemClassName.length - 1));
+  var newRow = tableBody.insertRow(tableBody.rows.length);
+
+  // Add Serial Number in the first column
+  var serialCell = newRow.insertCell(0);
+  serialCell.textContent = tableBody.rows.length; // Assuming that the table starts from 1
+
+  // Add data cells (input type text)
+  for (var i = 1; i < numColumns - 1; i++) {
+    var cell = newRow.insertCell(i);
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.style.width = '100%';
+    input.style.padding = '0'; // Set padding to 0
+    input.style.border = 'none'; // Remove border
+    input.style.outline = 'none'; // Remove outline
+    cell.appendChild(input);
+  }
+
+  // Add checkbox in the last column
+  var checkboxCell = newRow.insertCell(numColumns - 1);
+  var checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkboxCell.appendChild(checkbox);
+}
+// Function to save values
+function saveValues() {
+      var tables = document.querySelectorAll('.item table tbody');
+      var data = [];
+
+      tables.forEach(function (table, index) {
+        var rows = table.querySelectorAll('tr');
+        var rowData = [];
+
+        rows.forEach(function (row) {
+          var cells = row.querySelectorAll('input');
+          var cellData = [];
+
+          cells.forEach(function (cell) {
+            cellData.push(cell.value);
+          });
+
+          rowData.push(cellData);
+        });
+
+        data.push({ tableIndex: index + 1, rows: rowData });
+      });
+
+      // Here, you can decide how to handle or store the data
+      console.log('Data to be saved:', data);
+      // You may want to send the data to the server or perform other actions
+    }
+
+    // Attach click event handler to the "Save" button
+    document.getElementById('save-btn').addEventListener('click', saveValues);
+
+
+</script>
+{% endblock content %}
