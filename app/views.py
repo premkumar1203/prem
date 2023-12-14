@@ -11,7 +11,7 @@ import threading
 import serial
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
-from.models import Details,probecalibration
+from.models import Details,probecalibration,TableData
 
 
 
@@ -197,6 +197,27 @@ def probe12(request):
 
 
 def trace(request):
+    if request.method == 'POST':
+        received_data = request.POST.get('allData')
+        parsed_data = json.loads(received_data)
+
+        # Assuming you want to create a table based on received data
+        for table_data in parsed_data:
+            table_body_id = table_data['tableBodyId']
+            rows = table_data['rows']
+
+            # Create table or save data to the corresponding model as needed
+            # Example: Creating a YourTableModel instance and saving row data
+            for row in rows:
+                new_table_row = TableData(
+                    table_body_id=table_body_id,
+                    row_index=row['rowIndex'],
+                    values=row['values']
+                )
+                new_table_row.save()
+
+        return JsonResponse({'message': 'Data received and saved successfully.'})
+
     return render(request,'app/trace.html')
 
 def parameter(request):

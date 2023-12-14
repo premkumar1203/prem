@@ -1,4 +1,6 @@
 from django.db import models
+import json
+
 
 
 class Details(models.Model):
@@ -13,3 +15,10 @@ class probecalibration(models.Model):
     high_count = models.JSONField(default=list)  # Storing b1_values as a JSON array
     coefficent = models.JSONField(default=list)  # Storing e_values as a JSON array
 
+
+class TableData(models.Model):
+    data = models.JSONField()
+
+    @classmethod
+    def create_from_json(cls, json_data):
+        return cls(data=json.dumps(json_data))
