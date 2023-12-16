@@ -11,7 +11,8 @@ import threading
 import serial
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
-from.models import Details,probecalibration,TableData
+from.models import Details,probecalibration
+from .models import TableOneData, TableTwoData, TableThreeData, TableFourData, TableFiveData
 
 
 
@@ -196,29 +197,84 @@ def probe12(request):
     return render(request,'app/probe/probe12.html')
 
 
+@csrf_exempt
 def trace(request):
     if request.method == 'POST':
-        received_data = request.POST.get('allData')
-        parsed_data = json.loads(received_data)
+        try:
+            received_data = json.loads(request.POST.get('tableData'))
+            
+            # Process received_data and print in terminal before saving to the database for each table
+            for item_id, rows in received_data.items():
+                print(f"Table ID: {item_id}")
+                for row in rows:
+                    row_index = row['rowIndex']
+                    values = row['values']
 
-        # Assuming you want to create a table based on received data
-        for table_data in parsed_data:
-            table_body_id = table_data['tableBodyId']
-            rows = table_data['rows']
+                    print(f"Row Index: {row_index}")
+                    for column_index, value in enumerate(values):
+                        print(f"Column Index: {column_index + 1}, Value: {value}")
 
-            # Create table or save data to the corresponding model as needed
-            # Example: Creating a YourTableModel instance and saving row data
-            for row in rows:
-                new_table_row = TableData(
-                    table_body_id=table_body_id,
-                    row_index=row['rowIndex'],
-                    values=row['values']
-                )
-                new_table_row.save()
+                    # Check if the row already exists in the database based on a unique identifier
+                    if item_id == 'tableBody-1':
+                        existing_data = TableOneData.objects.filter(part_name=values[0], customer_name=values[1], part_model=values[2], part_no=values[3])
+                        if not existing_data.exists():
+                            # Save data to TableOneData model
+                            table_one_data = TableOneData.objects.create(
+                                part_name=values[0],
+                                customer_name=values[1],
+                                part_model=values[2],
+                                part_no=values[3]
+                            )
+                            table_one_data.save()
+                    
+                    elif item_id == 'tableBody-2':
+                        existing_data = TableTwoData.objects.filter(batch_no=values[0])
+                        if not existing_data.exists():
 
-        return JsonResponse({'message': 'Data received and saved successfully.'})
+                            # Save data to TableTwoData model
+                            table_two_data = TableTwoData.objects.create(
+                                batch_no=values[0]
+                            )
+                            table_two_data.save()
+                    elif item_id == 'tableBody-3':
+                        existing_data = TableThreeData.objects.filter(machine_no=values[0],machine_name=values[1])
+                        if not existing_data.exists():
 
-    return render(request,'app/trace.html')
+                            # Save data to TableThreeData model
+                            table_three_data = TableThreeData.objects.create(
+                                machine_no=values[0],
+                                machine_name=values[1]
+                            )
+                            table_three_data.save()
+                    elif item_id == 'tableBody-4':
+                        existing_data = TableFourData.objects.filter(operator_no=values[0],operator_name=values[1])
+                        if not existing_data.exists():
+
+                            # Save data to TableFourData model
+                            table_four_data = TableFourData.objects.create(
+                                operator_no=values[0],
+                                operator_name=values[1]
+                            )
+                            table_four_data.save()
+                    elif item_id == 'tableBody-5':
+                        existing_data = TableFiveData.objects.filter(vendor_code=values[0], email=values[1])
+                        if not existing_data.exists():
+
+                            # Save data to TableFiveData model
+                            table_five_data = TableFiveData.objects.create(
+                                vendor_code=values[0],
+                                email=values[1]
+                            )
+                            table_five_data.save()
+
+            return JsonResponse({'message': 'Data received and saved successfully'}, status=200)
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return render(request, 'app/trace.html')  # Render the template for GET requests
+
+
 
 def parameter(request):
     return render(request,'app/parameter.html')    

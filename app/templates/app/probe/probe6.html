@@ -1,78 +1,277 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Table</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
+{% extends 'app/layouts/main.html' %}
+{% block title %}
+Tracability
+{% endblock title %}
+{% block content %}
+<style>
+  
+.box-0{
+    width: 800px;
+    height:50px;
+    margin-left:380px ;
+    margin-top: 50px;
+    background-color: orange;
+    border: 2px solid black;
+    font-family:Arial, Helvetica, sans-serif
+}
 
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
+.box {
+    width: 800px;
+    height: 400px;
+    margin-left:380px ;
+    margin-top: -400px;
+    background-color: white;
+    border: 2px solid black;
+  }
+  
+  .box-1 {
+    width: 250px;
+    height: 400px;
+    margin-top:20px;
+    margin-left: 100px;
+    background-color: white;
+    border: 2px solid black;
+    padding-top: 50px;
+    padding-left: 5px;
+  }
 
-        input {
-            width: 100%;
-            padding: 0;
-            border: none;
-            outline: none;
-        }
-    </style>
-</head>
-<body>
+  .inner-box{
+    width: 230px; 
+    height: 50px;
+    background-color:lightblue; 
+    border: 2px solid black; 
+    margin: 5px;
+    padding-top: 10px;
+    cursor: pointer;
+    text-align: center;
+    justify-content: center;
+    font-family: Arial, Helvetica, sans-serif;
+  }
 
-<form>
-    <div>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th style="width: 5%;">Sr.No</th>
-                    <th style="width: 20%;">Part Name</th>
-                    <th style="width: 20%;">Customer Name</th>
-                    <th style="width: 20%;">Part Model</th>
-                    <th style="width: 20%;">Part No</th>
-                    <th style="width: 5%;">Check Box</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody-1"></tbody>
-        </table><br>
-        <button onclick="addRow('item-1', 6)">Add New</button>
+
+.item-1, .item-2, .item-3, .item-4, .item-5{
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s; 
+  }
+
+ 
+  #save-btn{
+    background-color: green;
+    color: white;
+    height: 50px;
+    width: 200px;
+    margin-top: 20px;
+    margin-left: 100px;
+  }
+  #delete-btn{
+    background-color: red;
+    color: white;
+    height: 50px;
+    width: 200px;
+    margin-top: 20px;
+    margin-left: 450px;
+  }
+  #cancel-btn{
+    background-color: orange;
+    color:black;
+    margin-top: 15px;
+    height: 50px;
+    width: 200px;
+    margin-left: 100px;
+   
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .inner-box:hover {
+      background-color: #f11a1a;
+    }
+
+</style>
+
+<div class="box-0">
+  <center style="color:black;text-shadow: 2px 2px 4px white;">
+    <h1><b>Tracability</b></h1></center>
+</div>
+
+<div class="box-1">
+  <div id="part" class="inner-box" onclick="showItem('item-1')"><h4><b>Part</b></h4></div>
+  <div id="batchNumber" class="inner-box" onclick="showItem('item-2')"><h4><b>Batch Number</b></h4></div>
+  <div id="machine" class="inner-box" onclick="showItem('item-3')"><h4><b>Machine</b></h4></div>
+  <div id="operator" class="inner-box" onclick="showItem('item-4')"><h4><b>Operator</b></h4></div>
+  <div id="vendorCode" class="inner-box" onclick="showItem('item-5')"><h4><b>Vendor Code</b></h4></div>
+</div>
+
+<div class="box" id="boxContent" style="overflow-x: auto; overflow-y: auto;">
+    <div class="item item-1">
+      <table border="1">
+        <thead>
+          <tr>
+            <th id="th-item1-sr" style="width: 5%;">Sr.No</th>
+            <th id="th-item1-part" style="width: 20%;">Part Name</th>
+            <th id="th-item1-customer" style="width: 20%;">Customer Name</th>
+            <th id="th-item1-model" style="width: 20%;">Part Model</th>
+            <th id="th-item1-partno" style="width: 20%;">Part No</th>
+            <th id="th-item1-checkbox" style="width: 5%;">Check Box</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody-1"></tbody>
+      </table><br>
+      <button onclick="addRow('item-1', 6)">Add New</button>
     </div>
-</form>
+  </div>
+  
+  <div class="item item-2">
+    <table border="1">
+      <thead>
+        <tr>
+          <th id="th-item2-sr" style="width: 5%;">Sr.No</th>
+          <th id="th-item2-batch" style="width: 20%;">Batch No</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-2"></tbody>
+    </table><br>
+    <button onclick="addRow('item-2', 3)">Add New</button>
+  </div>
+  
+  <div class="item item-3">
+    <table border="1">
+      <thead>
+        <tr>
+          <th id="th-item3-sr" style="width: 5%;">Sr.No</th>
+          <th id="th-item3-machineNo" style="width: 20%;">Machine No</th>
+          <th id="th-item3-machineName" style="width: 20%;">Machine Name</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-3"></tbody>
+    </table><br>
+    <button onclick="addRow('item-3', 4)">Add New</button>
+  </div>
+  
+  <div class="item item-4">
+    <table border="1">
+      <thead>
+        <tr>
+          <th id="th-item4-sr" style="width: 5%;">Sr.No</th>
+          <th id="th-item4-operatorNo" style="width: 20%;">Operator No</th>
+          <th id="th-item4-operatorName" style="width: 20%;">Operator Name</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-4"></tbody>
+    </table><br>
+    <button onclick="addRow('item-4', 4)">Add New</button>
+  </div>
+  
+  <div class="item item-5">
+    <table border="1">
+      <thead>
+        <tr>
+          <th id="th-item5-sr" style="width: 5%;">Sr.No</th>
+          <th id="th-item5-vendorCode" style="width: 25%;">Vendor Code</th>
+          <th id="th-item5-email" style="width: 25%;">Email</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody-5"></tbody>
+    </table><br>
+    <button onclick="addRow('item-5', 4)">Add New</button>
+  </div>
+  
+<button type="button" id="delete-btn"><b> Delete</b></button>
+<button type="button" id="save-btn"><b>Save</b></button>
+<a href="{% url 'index' %}" >
+  <button type="button" id="cancel-btn"><b>Cancel</b></button>
+</a>
 
 <script>
-    function addRow(itemClassName, numColumns) {
-        var tableBody = document.querySelector('#tableBody-' + itemClassName.charAt(itemClassName.length - 1));
-        var newRow = tableBody.insertRow(tableBody.rows.length);
 
-        // Add Serial Number in the first column
-        var serialCell = newRow.insertCell(0);
-        serialCell.textContent = tableBody.rows.length; // Assuming that the table starts from 1
+window.onload = function() {
+      showItem('item-1');
+    };
 
-        // Add data cells (input type text)
-        for (var i = 1; i < numColumns - 1; i++) {
-            var cell = newRow.insertCell(i);
-            var input = document.createElement('input');
-            input.type = 'text';
-            input.style.width = '100%';
-            input.style.padding = '0'; // Set padding to 0
-            input.style.border = 'none'; // Remove border
-            input.style.outline = 'none'; // Remove outline
-            cell.appendChild(input);
-        }
 
-        // Add checkbox in the last column
-        var checkboxCell = newRow.insertCell(numColumns - 1);
-        var checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkboxCell.appendChild(checkbox);
+    function showItem(itemClassName) {
+    var itemClasses = document.querySelectorAll('.item');
+    itemClasses.forEach(function (item) {
+      item.style.display = 'none';
+    });
+
+    var selectedItem = document.querySelector('.' + itemClassName);
+    if (selectedItem) {
+      selectedItem.style.display = 'block';
     }
-</script>
+  }
 
-</body>
-</html>
+
+  function addRow(itemClassName, numColumns) {
+  var tableBody = document.querySelector('#tableBody-' + itemClassName.charAt(itemClassName.length - 1));
+  var newRow = tableBody.insertRow(tableBody.rows.length);
+
+  // Add Serial Number in the first column
+  var serialCell = newRow.insertCell(0);
+  serialCell.textContent = tableBody.rows.length; // Assuming that the table starts from 1
+
+  // Add data cells (input type text)
+  for (var i = 1; i < numColumns - 1; i++) {
+    var cell = newRow.insertCell(i);
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.style.width = '100%';
+    input.style.padding = '0'; // Set padding to 0
+    input.style.border = 'none'; // Remove border
+    input.style.outline = 'none'; // Remove outline
+    cell.appendChild(input);
+  }
+
+  if (itemClassName === 'item-1'){
+            var checkboxCell = newRow.insertCell(numColumns - 1);
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkboxCell.appendChild(checkbox);
+        }
+}
+
+
+
+
+function changeInputBackgroundColor(thId) {
+  var inputFields = document.querySelectorAll('#' + thId + '-input');
+  
+  // Reset background color for all input fields
+  inputFields.forEach(function(input) {
+    input.style.backgroundColor = ''; // Reset background color to default or any specific color
+  });
+
+  // Change background color for the input fields associated with the clicked <th> element
+  inputFields.forEach(function(input) {
+    input.style.backgroundColor = 'lightblue'; // Change background color to the desired color
+  });
+}
+
+// Adding click event listeners to each <th> element by ID
+document.getElementById('th-item1-sr').addEventListener('click', function() {
+  changeInputBackgroundColor('th-item1-sr');
+});
+
+document.getElementById('th-item1-part').addEventListener('click', function() {
+  changeInputBackgroundColor('th-item1-part');
+});
+
+// Add event listeners for other <th> elements similarly for their IDs (th-item1-customer, th-item1-model, etc.)
+// Example:
+// document.getElementById('th-item1-customer').addEventListener('click', function() {
+//   changeInputBackgroundColor('th-item1-customer');
+// });
+
+
+</script>
+{% endblock content %}

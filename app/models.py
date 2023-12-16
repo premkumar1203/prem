@@ -16,9 +16,34 @@ class probecalibration(models.Model):
     coefficent = models.JSONField(default=list)  # Storing e_values as a JSON array
 
 
-class TableData(models.Model):
-    data = models.JSONField()
 
-    @classmethod
-    def create_from_json(cls, json_data):
-        return cls(data=json.dumps(json_data))
+class ItemData(models.Model):
+    item_number = models.IntegerField()  # Identifier for the item
+    data = models.TextField()  # Store item data as text
+
+    def __str__(self):
+        return f"Item {self.item_number}"
+
+
+
+class TableOneData(models.Model):
+    part_name = models.CharField(max_length=100)
+    customer_name = models.CharField(max_length=100)
+    part_model = models.CharField(max_length=100)
+    part_no = models.CharField(max_length=100)    
+
+class TableTwoData(models.Model):
+    batch_no = models.CharField(max_length=100)
+
+class TableThreeData(models.Model):
+    machine_no = models.CharField(max_length=100)
+    machine_name = models.CharField(max_length=100)
+
+class TableFourData(models.Model):
+    operator_no = models.CharField(max_length=100)
+    operator_name = models.CharField(max_length=100)
+
+class TableFiveData(models.Model):
+    vendor_code = models.CharField(max_length=100)
+    email = models.EmailField()
+
