@@ -118,7 +118,7 @@ Parameter Settings
     
     <label style="margin-left: 50px;">MASTER:</label>
     <label for="single" style="margin-left: -30px;" >Single
-        <input type="radio" id="single" name="radioOption" onclick="handleRadioClick('single')">
+        <input type="radio" id="single" name="radioOption" oninput="validateInteger(this)" onclick="handleRadioClick('single')">
     </label>
     
     <label for="double" style="margin-left: 10px;">Double
@@ -127,7 +127,7 @@ Parameter Settings
     
 
     <label for="probe_no">PROBE NO:</label>
-    <select id="parameter_name" name="parameter_name">
+    <select id="probe_no" name="probe_no" oninput="validateInteger(this)">
         <script>
             for (var i = 1; i <= 11; i++) {
                 document.write('<option value="' + i + '">' + i + '</option>');
@@ -136,9 +136,9 @@ Parameter Settings
     </select>
 
     <label for="analog_zero">ANALOG ZERO:</label>
-    <input type="text" id="analog_zero" style="width: 10%;">
+    <input type="text" id="analog_zero" style="width: 10%;" oninput="validateInteger(this)">
     <label for="high_mv" style="text-align: right;margin-left: 5px;">HIGH M-V:</label>
-    <input type="text" id="high_mv" style="width: 10%;"><br>
+    <input type="text" id="high_mv" style="width: 10%;" oninput="validateInteger(this)"><br> 
     
     
 
@@ -152,26 +152,26 @@ Parameter Settings
     </select>
 
     <label for="reference_value">REFERENCE VALUE:</label>
-    <input type="text" id="reference_value" style="width: 10%; ">
+    <input type="text" id="reference_value" style="width: 10%; " oninput="validateInteger(this)">
     <label for="low_mv" style="text-align: right; margin-left: 5px;" >LOW M-V:</label>
-    <input type="text" id="low_mv" style="width: 10%; "><br><br>
+    <input type="text" id="low_mv" style="width: 10%; " oninput="validateInteger(this)"><br><br>
 
     
 
     <label for="nominal">NOMINAL:</label>
-    <input type="text" id="nominal" style="width: 10%;">
+    <input type="text" id="nominal" style="width: 10%;" oninput="validateInteger(this)">
 
 
 
     <label for="usl" style="text-align: right;">USL:</label>
-    <input type="text" id="usl" style="width: 10%;">
+    <input type="text" id="usl" style="width: 10%;" oninput="validateInteger(this)">
 
     <label for="lsl" style="text-align: right;">LSL:</label>
-    <input type="text" id="lsl" style="width: 10%;"><br>
+    <input type="text" id="lsl" style="width: 10%;" oninput="validateInteger(this)"><br>
 
 
     <label for="mastering" style="margin-top: 15px;">MASTERING GROUP:</label>
-    <select id="mastering" name="mastering">
+    <select id="mastering" name="mastering" oninput="validateInteger(this)">
         <script>
             for (var i = 1; i <= 30; i++) {
                 document.write('<option value="' + i + '">' + i + '</option>');
@@ -180,7 +180,7 @@ Parameter Settings
     </select>
 
     <label for="step_no">STEP NO:</label>
-    <select id="step_no" name="step_no">
+    <select id="step_no" name="step_no" oninput="validateInteger(this)">
         <script>
             for (var i = 1; i <= 20; i++) {
                 document.write('<option value="' + i + '">' + i + '</option>');
@@ -190,7 +190,7 @@ Parameter Settings
  
     <div class="box-3">
         <button type="button" id="add-btn"><b> Add New</b></button>
-        <button type="button" id="save-btn"><b>Save</b></button>
+        <button type="button" id="save-btn" onclick="saveValues()"><b>Save</b></button>
         <button type="button" id="delete-btn"><b> Delete</b></button> 
         <a href="{% url 'index' %}" >
         <button type="button" id="cancel-btn"><b>Cancel</b></button>
@@ -220,7 +220,7 @@ let partModelInput;
 // Function to handle updating the PART MODEL input value
 function updatePartModelValue(value) {
     if (partModelInput) {
-        partModelInput.value = value;
+        partModelInput.value = value;onclick="saveValues()"
     } else {
         console.error('partModelInput is not defined');
     }
@@ -245,6 +245,65 @@ retrievedValues.forEach(value => {
 
 // Get the element for the PART MODEL input outside the loop
 partModelInput = document.getElementById('partModel');
+
+
+
+//this code is used to store this all values :::::::
+
+// Function to save values based on selected input
+function saveValues() {
+    const selectedValue = document.getElementById('partModel').value; // Get the selected value
+
+    // Get values from other input fields
+    const parameterNo = document.getElementById('parameter_no').value;
+    const parameterName = document.getElementById('parameter_name').value;
+    const probeNo = document.getElementById('probe_no').value;
+    const analogZero = document.getElementById('analog_zero').value;
+    const highMv = document.getElementById('high_mv').value;
+    const measurementMOde = document.getElementById('measurement_mode').value;
+    const referenceValue = document.getElementById('reference_value').value;
+    const lowMv = document.getElementById('low_mv').value;
+    const nominal = document.getElementById('nominal').value;
+    const usl = document.getElementById('usl').value;
+    const lsl = document.getElementById('lsl').value;
+    const mastering = document.getElementById('mastering').value;
+    const step_no = document.getElementById('step_no').value;
+    // ... (get other input values in a similar manner)
+
+    // Create an object to store these values
+    const valuesToSave = {
+        selectedValue: selectedValue,
+        parameterNo: parameterNo,
+        parameterName: parameterName,
+        probeNo: probeNo,
+        analogZero: analogZero,
+        highMv:highMv,
+        measurementMOde:measurementMOde,
+        referenceValue:referenceValue,
+        lowMv:lowMv,
+        nominal:nominal,
+        usl:usl,
+        lsl:lsl,
+        mastering:mastering,
+        step_no:step_no,
+        // ... (add other values to the object)
+    };
+// Store valuesToSave object in localStorage
+const storageKey = `values_${selectedValue}`; // Creating a unique key
+localStorage.setItem(storageKey, JSON.stringify(valuesToSave));
+
+// Retrieving stored data (for demonstration purposes - you can display this data as needed)
+const storedData = JSON.parse(localStorage.getItem(storageKey));
+console.log(storedData); // Displaying stored data in the console
+}
+
+
+
+// this is used to only integer field::::::::
+// Function to validate input and allow only integer values
+function validateInteger(input) {
+    input.value = input.value.replace(/[^0-9 .]/g, ''); // Allow only digits (0-9)
+}
 
 
 </script>
