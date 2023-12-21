@@ -3,9 +3,6 @@ import json
 
 
 
-class Details(models.Model):
-    type = models.CharField(max_length=20,default='',null=False)
-    name = models.CharField(max_length=20,default='',null=False)
   
 class probecalibration(models.Model):
     probe_id = models.CharField(max_length=50, unique=True)
@@ -47,3 +44,8 @@ class TableFiveData(models.Model):
     vendor_code = models.CharField(max_length=100)
     email = models.EmailField()
 
+class SavedData(models.Model):
+    # Define your model fields here
+    field1 = models.CharField(max_length=100)
+    field2 = models.IntegerField()
+    # Add more fields as needed

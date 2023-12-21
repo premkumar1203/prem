@@ -11,7 +11,7 @@ import threading
 import serial
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
-from.models import Details,probecalibration
+from.models import probecalibration,SavedData
 from .models import TableOneData, TableTwoData, TableThreeData, TableFourData, TableFiveData
 
 
@@ -185,16 +185,10 @@ def probe5(request):
 def probe6(request):
     return render(request,'app/probe/probe6.html')
 
-def probe12(request):
-    if request.method == 'POST':
-        type = request.POST['type']
-        name = request.POST['name']
-        print(type,name)
-        obj=Details()
-        obj.type=type
-        obj.name=name
-        obj.save()
-    return render(request,'app/probe/probe12.html')
+def probe(request):
+    return render(request,'app/probe.html')
+
+
 
 
 @csrf_exempt
@@ -272,9 +266,19 @@ def trace(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
     else:
-        return render(request, 'app/trace.html')  # Render the template for GET requests
-
+            # Pass part_model to the parameter view
+            return render(request, 'app/trace.html')
+        
 
 
 def parameter(request):
-    return render(request,'app/parameter.html')    
+        # Get the value from the URL parameter
+    value = request.GET.get('retrievedValues', '')  # Fetch the value from the URL parameter named 'value'
+
+    # Do something with the 'value'
+    # For example, print it
+    print(f"The received value is:",value)
+
+    # Process the value as per your requirement
+
+    return render(request, 'app/parameter.html')

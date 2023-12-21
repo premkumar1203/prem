@@ -230,35 +230,44 @@ th, td {
  
 
     function saveData() {
-    var tables = document.querySelectorAll('.item');
-    var allRowData = {}; // All row data for all tables
-    tables.forEach((table, index) => {
-        var tableBodyId = 'tableBody-' + (index + 1);
-        var tableBody = table.querySelector('#' + tableBodyId);
-        var rowData = []; // Row data for a specific table
+  var tables = document.querySelectorAll('.item');
+  var allRowData = {}; // All row data for all tables
+  tables.forEach((table, index) => {
+    var tableBodyId = 'tableBody-' + (index + 1);
+    var tableBody = table.querySelector('#' + tableBodyId);
+    var rowData = []; // Row data for a specific table
 
-        for (var i = 0; i < tableBody.rows.length; i++) {
-            var row = tableBody.rows[i];
-            var rowDataItem = {
-                rowIndex: i + 1,
-                values: []
-            };
+    for (var i = 0; i < tableBody.rows.length; i++) {
+      var row = tableBody.rows[i];
+      var rowDataItem = {
+        rowIndex: i + 1,
+        values: []
+      };
 
-            for (var j = 1; j < row.cells.length; j++) {
-                var input = row.cells[j].querySelector('input');
-                rowDataItem.values.push(input.value);
-            }
-            rowData.push(rowDataItem);
-        }
+      for (var j = 1; j < row.cells.length; j++) {
+        var input = row.cells[j].querySelector('input');
+        rowDataItem.values.push(input.value);
+      }
+      rowData.push(rowDataItem);
+    }
 
-        allRowData[tableBodyId] = rowData;
-    });
+    allRowData[tableBodyId] = rowData;
+  });
 
-    // Update localStorage with allRowData
-    localStorage.setItem('tableData', JSON.stringify(allRowData));
-    console.log('Data saved:', allRowData);
+  localStorage.setItem('tableData', JSON.stringify(allRowData));
 
+// Retrieving value from stored data
+const storedData = JSON.parse(localStorage.getItem('tableData'));
 
+// Assuming "values" is an array that contains values from multiple rows
+const valuesToPass = storedData["tableBody-1"].map(row => row.values[2]);
+
+// Storing the array of values in localStorage
+localStorage.setItem('modeValues', JSON.stringify(valuesToPass));
+
+console.log(valuesToPass); // Verify that you have an array of values
+
+    
 
     // Get CSRF token from the cookie
     const csrftoken = getCookie('csrftoken');

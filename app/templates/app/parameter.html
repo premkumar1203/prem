@@ -12,6 +12,19 @@ Parameter Settings
         background-color: lightblue;
         border: 2px solid black;     
     }
+
+    /* CSS styles for the input fields */
+        .custom-input {
+        background-color: lightblue;
+        cursor: pointer;
+        }
+
+        /* Change background color on focus */
+        .custom-input:focus {
+        background-color: red; /* Change this to the desired highlighted color */
+        }
+
+
     .box-3{
         height: 50px;
         width: 900px;
@@ -27,6 +40,14 @@ Parameter Settings
         border: 2px solid black;  
         margin-top: -530px;
     }
+
+    /* CSS to style the input element */
+    .box-2 input[type="text"] {
+        border: none; /* Remove border */
+        width: 100%; /* Set width to 100% */
+        outline: none; /* Remove outline */
+    }
+
     label {
             display: inline-block;
             width: 150px; 
@@ -81,7 +102,7 @@ Parameter Settings
 <div class="box-1">
     
     <label for="partModel">PART MODEL:</label>
-    <input type="text" id="partModel">
+    <input type="text" id="partModel"> 
 
     <label for="parameter_no" style="margin-left: 80px;">PARAMETER NO:</label>
     <select id="parameter_no" name="parameter_no" style="width: 50px;">
@@ -178,8 +199,56 @@ Parameter Settings
 
 </div>
 
-<div class="box-2">
+<div class="box-2" id="model_name">
+
 </div>
+
+
+<script>
+
+// Retrieve the array of values from localStorage
+const retrievedValues = JSON.parse(localStorage.getItem('modeValues'));
+console.log('YOUR VALUE IS :',retrievedValues)
+
+
+// Get the parent element by its ID where inputs will be appended
+const modelInputContainer = document.getElementById('model_name');
+
+// Declare partModelInput in the broader scope
+let partModelInput;
+
+// Function to handle updating the PART MODEL input value
+function updatePartModelValue(value) {
+    if (partModelInput) {
+        partModelInput.value = value;
+    } else {
+        console.error('partModelInput is not defined');
+    }
+}
+
+// Display each value from the retrieved array in the input field as readonly with a light blue background
+retrievedValues.forEach(value => {
+    const newInput = document.createElement('input');
+    newInput.type = 'text';
+    newInput.value = value;
+    newInput.readOnly = true;
+    newInput.classList.add('custom-input'); // Adding a class to the input
+
+    // Event listener to update the PART MODEL input value when the input is clicked
+    newInput.addEventListener('click', function() {
+        updatePartModelValue(value);
+    });
+
+    // Append the newly created input to the container element
+    modelInputContainer.appendChild(newInput);
+});
+
+// Get the element for the PART MODEL input outside the loop
+partModelInput = document.getElementById('partModel');
+
+
+</script>
+
 
 <script>
     function handleRadioClick(option) {
