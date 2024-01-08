@@ -3,7 +3,7 @@ from django.urls import path,include
 from django.conf.urls.static import static
 from app import views
 
-
+from . import views
 
 
 
@@ -20,6 +20,7 @@ urlpatterns = [
     path('probe/',views.probe,name="probe"),
     path('trace/',views.trace,name="trace"),
     path('parameter/',views.parameter,name="parameter"),
+    
 
 ]
 

@@ -13,18 +13,6 @@ Parameter Settings
         border: 2px solid black;     
     }
 
-    /* CSS styles for the input fields */
-        .custom-input {
-        background-color: lightblue;
-        cursor: pointer;
-        }
-
-        /* Change background color on focus */
-        .custom-input:focus {
-        background-color: red; /* Change this to the desired highlighted color */
-        }
-
-
     .box-3{
         height: 50px;
         width: 900px;
@@ -40,6 +28,10 @@ Parameter Settings
         border: 2px solid black;  
         margin-top: -530px;
     }
+
+    #model_dropdown {
+    width: 220px;
+}
 
     /* CSS to style the input element */
     .box-2 input[type="text"] {
@@ -93,13 +85,52 @@ Parameter Settings
             height:40px ;
             margin-left: 10px;
         }
+
+        ul ul {
+            display: none;
+        }
+
+        /* Show nested lists when active class is present */
+        ul ul.active {
+            display: block;
+        }
+
+        /* Change the appearance of the toggles */
+        .toggle {
+            cursor: pointer;
+        }
+
+        .collapsed::before {
+            content: "+ ";
+        }
+
+        /* Adjust appearance of expanded/collapsed toggles */
+        ul ul.active .toggle.collapsed::before {
+            content: "- ";
+        }
+
+        .box-2 {
+            /* Define a fixed height for the box to enable scrolling */
+            height: 530px; /* Adjust the height as needed */
+            overflow-y: auto; /* Enable vertical scrollbar */
+        }
+
+        .custom-span {
+            cursor: pointer; /* Change cursor to pointer on hover */
+        }
+        .selected {
+            background-color: red; /* Change background color when selected */
+        }
+
+
+
 </style>
 
 
 <center style="color: white; text-shadow: 2px 2px 4px #000000;">
     <h1><b>Parameter Settings</b></h1></center>
 
-<div class="box-1">
+<div class="box-1" id="box1">
     
     <label for="partModel">PART MODEL:</label>
     <input type="text" id="partModel"> 
@@ -111,7 +142,12 @@ Parameter Settings
                 document.write('<option value="' + i + '">' + i + '</option>');
             }
         </script>
-    </select><br>
+    </select>
+
+
+    <label for="sr.no" style="margin-left: 80px;">SR.NO:</label>
+    <input type="text" id="sr_no" name="sr_no" style="width: 35px;"><br>
+
 
     <label for="parameter_name">PARAMETER NAME:</label>
     <input type="text" id="parameter_name">
@@ -200,140 +236,254 @@ Parameter Settings
 </div>
 
 <div class="box-2" id="model_name">
-
+    <!-- Other elements in box-2 -->
+ <ul id="toggleList">
+   <!-- List items will be dynamically added here -->
+ </ul>
+   
 </div>
 
 
 <script>
 
-// Retrieve the array of values from localStorage
-const retrievedValues = JSON.parse(localStorage.getItem('modeValues'));
-console.log('YOUR VALUE IS :',retrievedValues)
+    // Retrieve the array of values from localStorage
+    const retrievedValues = JSON.parse(localStorage.getItem('modeValues'));
+    console.log('YOUR VALUE IS :',retrievedValues)
+    
 
+////////////////////////////////////////////////    
+    let partModelInput;
 
-// Get the parent element by its ID where inputs will be appended
-const modelInputContainer = document.getElementById('model_name');
-
-// Declare partModelInput in the broader scope
-let partModelInput;
-
-// Function to handle updating the PART MODEL input value
-function updatePartModelValue(value) {
-    if (partModelInput) {
-        partModelInput.value = value;onclick="saveValues()"
-    } else {
-        console.error('partModelInput is not defined');
-    }
-}
-
-// Display each value from the retrieved array in the input field as readonly with a light blue background
-retrievedValues.forEach(value => {
-    const newInput = document.createElement('input');
-    newInput.type = 'text';
-    newInput.value = value;
-    newInput.readOnly = true;
-    newInput.classList.add('custom-input'); // Adding a class to the input
-
-    // Event listener to update the PART MODEL input value when the input is clicked
-    newInput.addEventListener('click', function() {
-        updatePartModelValue(value);
-    });
-
-    // Append the newly created input to the container element
-    modelInputContainer.appendChild(newInput);
-});
-
-// Get the element for the PART MODEL input outside the loop
-partModelInput = document.getElementById('partModel');
-
-
-
-//this code is used to store this all values :::::::
-
-// Function to save values based on selected input
-function saveValues() {
-    const selectedValue = document.getElementById('partModel').value; // Get the selected value
-
-    // Get values from other input fields
-    const parameterNo = document.getElementById('parameter_no').value;
-    const parameterName = document.getElementById('parameter_name').value;
-    const probeNo = document.getElementById('probe_no').value;
-    const analogZero = document.getElementById('analog_zero').value;
-    const highMv = document.getElementById('high_mv').value;
-    const measurementMOde = document.getElementById('measurement_mode').value;
-    const referenceValue = document.getElementById('reference_value').value;
-    const lowMv = document.getElementById('low_mv').value;
-    const nominal = document.getElementById('nominal').value;
-    const usl = document.getElementById('usl').value;
-    const lsl = document.getElementById('lsl').value;
-    const mastering = document.getElementById('mastering').value;
-    const step_no = document.getElementById('step_no').value;
-    // ... (get other input values in a similar manner)
-
-    // Create an object to store these values
-    const valuesToSave = {
-        selectedValue: selectedValue,
-        parameterNo: parameterNo,
-        parameterName: parameterName,
-        probeNo: probeNo,
-        analogZero: analogZero,
-        highMv:highMv,
-        measurementMOde:measurementMOde,
-        referenceValue:referenceValue,
-        lowMv:lowMv,
-        nominal:nominal,
-        usl:usl,
-        lsl:lsl,
-        mastering:mastering,
-        step_no:step_no,
-        // ... (add other values to the object)
-    };
-// Store valuesToSave object in localStorage
-const storageKey = `values_${selectedValue}`; // Creating a unique key
-localStorage.setItem(storageKey, JSON.stringify(valuesToSave));
-
-// Retrieving stored data (for demonstration purposes - you can display this data as needed)
-const storedData = JSON.parse(localStorage.getItem(storageKey));
-console.log(storedData); // Displaying stored data in the console
-}
-
-
-
-// this is used to only integer field::::::::
-// Function to validate input and allow only integer values
-function validateInteger(input) {
-    input.value = input.value.replace(/[^0-9 .]/g, ''); // Allow only digits (0-9)
-}
-
-
-</script>
-
-
-<script>
-    function handleRadioClick(option) {
-        // Get references to the input fields
-        var analogZeroInput = document.getElementById('analog_zero');
-        var highMvInput = document.getElementById('high_mv');
-        var referenceValueInput = document.getElementById('reference_value');
-        var lowMvInput = document.getElementById('low_mv');
-
-        // Reset all fields to enabled
-        analogZeroInput.disabled = false;
-        highMvInput.disabled = false;
-        referenceValueInput.disabled = false;
-        lowMvInput.disabled = false;
-
-        // Disable specific fields based on the radio button clicked
-        if (option === 'single') {
-            document.getElementById('high_mv').disabled = true;
-            document.getElementById('low_mv').disabled = true;
-        } else if (option === 'double') {
-            document.getElementById('analog_zero').disabled = true;
-            document.getElementById('reference_value').disabled = true;
+        function updatePartModelValue(value) {
+        if (partModelInput) {
+            partModelInput.value = value;
+            partModelInput.classList.add('selected'); // Change background color
+            // Trigger your saveValues() function here if needed
+            saveValues();
+        } else {
+            console.error('partModelInput is not defined');
         }
+        }
+
+        retrievedValues.forEach(value => {
+        const newSpan = document.createElement('li');
+        newSpan.textContent = value;
+        newSpan.classList.add('custom-span'); // Add your custom class for styling if needed
+
+        newSpan.addEventListener('click', function() {
+            updatePartModelValue(value);
+        });
+
+        newSpan.addEventListener('mouseover', function() {
+            this.style.cursor = 'pointer'; // Change cursor on hover
+        });
+
+
+        const listItem = document.createElement('li');
+        listItem.textContent = value;
+
+        listItem.addEventListener('click', function() {
+            updatePartModelValue(value);
+        });
+        document.getElementById('toggleList').appendChild(listItem);
+        });
+
+        partModelInput = document.getElementById('partModel');
+
+        function toggleListVisibility() {
+        document.getElementById('toggleList').classList.toggle('hidden');
+        }
+
+        partModelInput.addEventListener('click', toggleListVisibility);
+
+        document.getElementById('toggleList').classList.add('hidden');
+
+
+    // /////////////////////////
+
+
+        function addParameterToList() {
+        const partModel = partModelInput.value; // Update to use input value
+        const parameterName = document.getElementById('parameter_name').value;
+
+        if (partModel.trim() === '') {
+            return;
+        }
+
+        if (parameterName.trim() === '') {
+            return;
+        }
+
+        const listItem = document.createElement('li');
+        listItem.textContent = `${parameterName}`;
+
+        const modelListItem = document.getElementById(`${partModel}-item`);
+
+        if (!modelListItem) {
+            const modelListItem = document.createElement('li');
+            modelListItem.textContent = `${partModel}`;
+            modelListItem.id = `${partModel}-item`;
+            modelListItem.classList.add('toggle', 'model-toggle');
+
+            const nestedList = document.createElement('ul');
+            nestedList.appendChild(listItem);
+
+            modelListItem.appendChild(nestedList);
+
+            document.getElementById('toggleList').appendChild(modelListItem);
+
+            // Add click event listener to each model item
+            modelListItem.addEventListener('click', function() {
+            const nestedList = this.querySelector('ul');
+            nestedList.classList.toggle('active');
+            });
+        } else {
+            const nestedList = modelListItem.querySelector('ul');
+            nestedList.appendChild(listItem);
+        }
+
+        document.getElementById('parameter_name').value = '';
+        saveValues(); // Save the values after appending
+        }
+
+///////////////////////////////////////
+
+function saveValues() {
+       // Retrieve values from input fields
+       const partModel = document.getElementById('partModel').value;
+    
+       // Check if the selected model matches the current iteration value
+           const parameterName = document.getElementById('parameter_name').value;
+           const parameterNo = document.getElementById('parameter_no').value;
+           const singleRadio = document.getElementById('single').checked;
+           const doubleRadio = document.getElementById('double').checked;
+           const probeNo = document.getElementById('probe_no').value;
+           const analogZero = document.getElementById('analog_zero').value;
+           const highMv = document.getElementById('high_mv').value;
+           const measurementMode = document.getElementById('measurement_mode').value;
+           const referenceValue = document.getElementById('reference_value').value;
+           const lowMv = document.getElementById('low_mv').value;
+           const nominal = document.getElementById('nominal').value;
+           const usl = document.getElementById('usl').value;
+           const lsl = document.getElementById('lsl').value;
+           const mastering = document.getElementById('mastering').value;
+           const stepNo = document.getElementById('step_no').value;
+    
+    
+           const parameter={
+            parameterName: parameterName,
+           };
+           // Create an object to store selected model values
+           const valuesToStore = {
+               partModel: partModel,
+               parameterNo: parameterNo,
+               singleRadio: singleRadio,
+               doubleRadio: doubleRadio,
+               probeNo: probeNo,
+               analogZero: analogZero,
+               highMv: highMv,
+               measurementMode: measurementMode,
+               referenceValue: referenceValue,
+               lowMv: lowMv,
+               nominal: nominal,
+               usl: usl,
+               lsl: lsl,
+               mastering: mastering,
+               stepNo: stepNo,
+           };
+               addParameterToList();
+           // Convert values to a JSON string and store in localStorage
+           localStorage.setItem('storedValues', JSON.stringify(valuesToStore));
+    
+           // Optionally, display a confirmation message
+           console.log('Values for selected model saved successfully:', valuesToStore);
     }
-</script>
-
-
-
-{% endblock content %}
+    
+    
+    
+    
+    
+    // this is used to only integer field::::::::
+    // Function to validate input and allow only integer values
+    function validateInteger(input) {
+       input.value = input.value.replace(/[^0-9 .]/g, ''); // Allow only digits (0-9)
+    }
+    
+    
+    
+       function handleRadioClick(option) {
+           // Get references to the input fields
+           var analogZeroInput = document.getElementById('analog_zero');
+           var highMvInput = document.getElementById('high_mv');
+           var referenceValueInput = document.getElementById('reference_value');
+           var lowMvInput = document.getElementById('low_mv');
+    
+           // Reset all fields to enabled
+           analogZeroInput.disabled = false;
+           highMvInput.disabled = false;
+           referenceValueInput.disabled = false;
+           lowMvInput.disabled = false;
+    
+           // Disable specific fields based on the radio button clicked
+           if (option === 'single') {
+               document.getElementById('high_mv').disabled = true;
+               document.getElementById('low_mv').disabled = true;
+           } else if (option === 'double') {
+               document.getElementById('analog_zero').disabled = true;
+               document.getElementById('reference_value').disabled = true;
+           }
+       }
+    
+    
+    // Function to reset/clear input fields
+    function resetInputFields() {
+        document.getElementById('partModel').value = ''; 
+        document.getElementById('parameter_name').value = '';
+        document.getElementById('analog_zero').value = '';
+        document.getElementById('high_mv').value = '';
+        document.getElementById('reference_value').value = '';
+        document.getElementById('low_mv').value = '';
+        document.getElementById('nominal').value = '';
+        document.getElementById('usl').value = '';
+        document.getElementById('lsl').value = '';
+        // ... (clear other input fields in a similar manner)
+    }
+    
+    // Event listener for the "Add New" button
+    document.getElementById('add-btn').addEventListener('click', function() {
+       resetInputFields(); // Clear the input fields when the button is clicked
+    });
+    
+    //////////////////////////
+    
+    
+    window.onload = function() {
+       var srNoInput = document.getElementById('sr_no');
+       srNoInput.value = '1'; // Set the default value to 1
+    }
+    
+    document.getElementById('add-btn').addEventListener('click', function() {
+       autoIncrement();
+    });
+    
+    function autoIncrement() {
+       var srNoInput = document.getElementById('sr_no');
+       var currentValue = parseInt(srNoInput.value);
+    
+       // Check if the current value is a valid number
+       if (!isNaN(currentValue)) {
+           srNoInput.value = currentValue + 1; // Increment the value
+       } else {
+           srNoInput.value = 1; // If the value is not a number, start from 1
+       }
+    }
+    
+    
+    </script>
+    
+    
+    
+    {% endblock content %}
+    
+    
+    

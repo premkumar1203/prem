@@ -13,8 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
 from.models import probecalibration,SavedData
 from .models import TableOneData, TableTwoData, TableThreeData, TableFourData, TableFiveData
-
-
+from django.shortcuts import get_object_or_404
 
 import json
 
@@ -192,93 +191,114 @@ def probe(request):
 
 
 @csrf_exempt
-def trace(request):
+def trace(request, row_id=None):
     if request.method == 'POST':
         try:
-            received_data = json.loads(request.POST.get('tableData'))
-            
-            # Process received_data and print in terminal before saving to the database for each table
+            received_data = json.loads(request.body)
+            print(f'received_data',request.body)
+
+            # Process received_data and save to the database for each table
             for item_id, rows in received_data.items():
-                print(f"Table ID: {item_id}")
                 for row in rows:
-                    row_index = row['rowIndex']
                     values = row['values']
 
-                    print(f"Row Index: {row_index}")
-                    for column_index, value in enumerate(values):
-                        print(f"Column Index: {column_index + 1}, Value: {value}")
-
-                    # Check if the row already exists in the database based on a unique identifier
                     if item_id == 'tableBody-1':
-                        existing_data = TableOneData.objects.filter(part_name=values[0], customer_name=values[1], part_model=values[2], part_no=values[3])
-                        if not existing_data.exists():
-                            # Save data to TableOneData model
-                            table_one_data = TableOneData.objects.create(
-                                part_name=values[0],
-                                customer_name=values[1],
-                                part_model=values[2],
-                                part_no=values[3]
-                            )
-                            table_one_data.save()
-                    
+                        table_data = TableOneData.objects.create(
+                            part_name=values[0],
+                            customer_name=values[1],
+                            part_model=values[2],
+                            part_no=values[3]
+                        )
+                        table_data.save()
+
                     elif item_id == 'tableBody-2':
-                        existing_data = TableTwoData.objects.filter(batch_no=values[0])
-                        if not existing_data.exists():
+                        table_data = TableTwoData.objects.create(
+                            batch_no=values[0]
+                        )
+                        table_data.save()
 
-                            # Save data to TableTwoData model
-                            table_two_data = TableTwoData.objects.create(
-                                batch_no=values[0]
-                            )
-                            table_two_data.save()
                     elif item_id == 'tableBody-3':
-                        existing_data = TableThreeData.objects.filter(machine_no=values[0],machine_name=values[1])
-                        if not existing_data.exists():
+                        table_data = TableThreeData.objects.create(
+                            machine_no=values[0],
+                            machine_name=values[1]
+                        )
+                        table_data.save()
 
-                            # Save data to TableThreeData model
-                            table_three_data = TableThreeData.objects.create(
-                                machine_no=values[0],
-                                machine_name=values[1]
-                            )
-                            table_three_data.save()
                     elif item_id == 'tableBody-4':
-                        existing_data = TableFourData.objects.filter(operator_no=values[0],operator_name=values[1])
-                        if not existing_data.exists():
+                        table_data = TableFourData.objects.create(
+                            operator_no=values[0],
+                            operator_name=values[1]
+                        )
+                        table_data.save()
 
-                            # Save data to TableFourData model
-                            table_four_data = TableFourData.objects.create(
-                                operator_no=values[0],
-                                operator_name=values[1]
-                            )
-                            table_four_data.save()
                     elif item_id == 'tableBody-5':
-                        existing_data = TableFiveData.objects.filter(vendor_code=values[0], email=values[1])
-                        if not existing_data.exists():
-
-                            # Save data to TableFiveData model
-                            table_five_data = TableFiveData.objects.create(
-                                vendor_code=values[0],
-                                email=values[1]
-                            )
-                            table_five_data.save()
+                        table_data = TableFiveData.objects.create(
+                            vendor_code=values[0],
+                            email=values[1]
+                        )
+                        table_data.save()
 
             return JsonResponse({'message': 'Data received and saved successfully'}, status=200)
-        
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+
+    elif request.method == 'GET':
+        try:
+            # Fetch stored data for tableBody-1 from your database or any storage mechanism
+            # Replace this with your actual logic to fetch data for tableBody-1
+            table_body_1_data = TableOneData.objects.all()  # Replace YourTableModel with your actual model
+            table_body_2_data = TableTwoData.objects.all()
+            table_body_3_data = TableThreeData.objects.all()
+            table_body_4_data = TableFourData.objects.all()
+            table_body_5_data = TableFiveData.objects.all()
+            # Pass the retrieved data for tableBody-1 to the template for rendering
+            return render(request, 'app/trace.html', {'table_body_1_data': table_body_1_data,'table_body_2_data':table_body_2_data,'table_body_3_data': table_body_3_data,'table_body_4_data': table_body_4_data,'table_body_5_data': table_body_5_data})
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    elif request.method == 'DELETE':
+        try:
+            received_data = json.loads(request.body)
+
+            for item_id, row_ids in received_data.items():
+                if item_id == 'tableBody-1':
+                    TableOneData.objects.filter(id__in=row_ids).delete()
+                elif item_id == 'tableBody-2':
+                    TableTwoData.objects.filter(id__in=row_ids).delete()
+                elif item_id == 'tableBody-3':
+                    TableThreeData.objects.filter(id__in=row_ids).delete()
+                elif item_id == 'tableBody-4':
+                    TableFourData.objects.filter(id__in=row_ids).delete()
+                elif item_id == 'tableBody-5':
+                    TableFiveData.objects.filter(id__in=row_ids).delete()
+
+            return JsonResponse({'message': 'Data deleted successfully'}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+
+                                
     else:
-            # Pass part_model to the parameter view
-            return render(request, 'app/trace.html')
-        
+        return render(request, 'app/trace.html')
+
+
+
+
+
+
+
+            
+
+
+
+
 
 
 def parameter(request):
-        # Get the value from the URL parameter
-    value = request.GET.get('retrievedValues', '')  # Fetch the value from the URL parameter named 'value'
-
-    # Do something with the 'value'
-    # For example, print it
-    print(f"The received value is:",value)
-
-    # Process the value as per your requirement
-
     return render(request, 'app/parameter.html')
+
