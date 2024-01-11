@@ -13,6 +13,18 @@ Parameter Settings
         border: 2px solid black;     
     }
 
+    /* CSS styles for the input fields */
+        .custom-input {
+        background-color: lightblue;
+        cursor: pointer;
+        }
+
+        /* Change background color on focus */
+        .custom-input:focus {
+        background-color: red; /* Change this to the desired highlighted color */
+        }
+
+
     .box-3{
         height: 50px;
         width: 900px;
@@ -33,11 +45,11 @@ Parameter Settings
     width: 220px;
 }
 
-    /* CSS to style the input element */
+    
     .box-2 input[type="text"] {
-        border: none; /* Remove border */
-        width: 100%; /* Set width to 100% */
-        outline: none; /* Remove outline */
+        border: none; 
+        width: 100%;
+        outline: none; 
     }
 
     label {
@@ -86,44 +98,8 @@ Parameter Settings
             margin-left: 10px;
         }
 
-        ul ul {
-            display: none;
-        }
-
-        /* Show nested lists when active class is present */
-        ul ul.active {
-            display: block;
-        }
-
-        /* Change the appearance of the toggles */
-        .toggle {
-            cursor: pointer;
-        }
-
-        .collapsed::before {
-            content: "+ ";
-        }
-
-        /* Adjust appearance of expanded/collapsed toggles */
-        ul ul.active .toggle.collapsed::before {
-            content: "- ";
-        }
-
-        .box-2 {
-            /* Define a fixed height for the box to enable scrolling */
-            height: 530px; /* Adjust the height as needed */
-            overflow-y: auto; /* Enable vertical scrollbar */
-        }
-
-        .custom-span {
-            cursor: pointer; /* Change cursor to pointer on hover */
-        }
-        .selected {
-            background-color: red; /* Change background color when selected */
-        }
-
-
-
+        
+        
 </style>
 
 
@@ -135,19 +111,11 @@ Parameter Settings
     <label for="partModel">PART MODEL:</label>
     <input type="text" id="partModel"> 
 
-    <label for="parameter_no" style="margin-left: 80px;">PARAMETER NO:</label>
-    <select id="parameter_no" name="parameter_no" style="width: 50px;">
-        <script>
-            for (var i = 1; i <= 40; i++) {
-                document.write('<option value="' + i + '">' + i + '</option>');
-            }
-        </script>
-    </select>
+   
 
-
-    <label for="sr.no" style="margin-left: 80px;">SR.NO:</label>
-    <input type="text" id="sr_no" name="sr_no" style="width: 35px;"><br>
-
+    <label for="sr.no" style="margin-left: 60px;">PARAMETER.NO:</label>
+    <input type="text" id="sr_no" name="sr_no" style="width: 50px;"><br>
+    
 
     <label for="parameter_name">PARAMETER NAME:</label>
     <input type="text" id="parameter_name">
@@ -207,7 +175,7 @@ Parameter Settings
 
 
     <label for="mastering" style="margin-top: 15px;">MASTERING GROUP:</label>
-    <select id="mastering" name="mastering" oninput="validateInteger(this)">
+    <select id="mastering"  style="width: 15%;" name="mastering" oninput="validateInteger(this)">
         <script>
             for (var i = 1; i <= 30; i++) {
                 document.write('<option value="' + i + '">' + i + '</option>');
@@ -216,14 +184,19 @@ Parameter Settings
     </select>
 
     <label for="step_no">STEP NO:</label>
-    <select id="step_no" name="step_no" oninput="validateInteger(this)">
+    <select id="step_no" style="width: 15%;" name="step_no" oninput="validateInteger(this)">
         <script>
             for (var i = 1; i <= 20; i++) {
                 document.write('<option value="' + i + '">' + i + '</option>');
             }
         </script>
-    </select><br>
- 
+    </select>
+    
+    <label for="hide" style="text-align: right;margin-left: 5px;">HIDE:</label>
+    <input type="checkbox" id="hide" style="width: 5%;margin-left:0px;" name="hideCheckbox"><br>
+
+
+
     <div class="box-3">
         <button type="button" id="add-btn"><b> Add New</b></button>
         <button type="button" id="save-btn" onclick="saveValues()"><b>Save</b></button>
@@ -235,255 +208,238 @@ Parameter Settings
 
 </div>
 
-<div class="box-2" id="model_name">
-    <!-- Other elements in box-2 -->
- <ul id="toggleList">
-   <!-- List items will be dynamically added here -->
- </ul>
-   
-</div>
+<div class="box-2" id="model_name"style="overflow-x: auto;overflow-y:auto;">
+    {% for data in table_body_1_data %}
+       <b> <ul>{{ data.part_model }}
 
+            
+        </ul></b>
+    {% endfor %}
+    </div>
 
 <script>
 
-    // Retrieve the array of values from localStorage
-    const retrievedValues = JSON.parse(localStorage.getItem('modeValues'));
-    console.log('YOUR VALUE IS :',retrievedValues)
-    
 
-////////////////////////////////////////////////    
-    let partModelInput;
+// Keep track of sr_no for each ul element
 
-        function updatePartModelValue(value) {
-        if (partModelInput) {
-            partModelInput.value = value;
-            partModelInput.classList.add('selected'); // Change background color
-            // Trigger your saveValues() function here if needed
-            saveValues();
-        } else {
-            console.error('partModelInput is not defined');
-        }
-        }
+let ulCounters = {};
+  
 
-        retrievedValues.forEach(value => {
-        const newSpan = document.createElement('li');
-        newSpan.textContent = value;
-        newSpan.classList.add('custom-span'); // Add your custom class for styling if needed
-
-        newSpan.addEventListener('click', function() {
-            updatePartModelValue(value);
-        });
-
-        newSpan.addEventListener('mouseover', function() {
-            this.style.cursor = 'pointer'; // Change cursor on hover
-        });
+    const ulElements = document.querySelectorAll('.box-2 ul');
+    let lastSelectedUL = null; // Store reference to the last selected UL
 
 
-        const listItem = document.createElement('li');
-        listItem.textContent = value;
-
-        listItem.addEventListener('click', function() {
-            updatePartModelValue(value);
-        });
-        document.getElementById('toggleList').appendChild(listItem);
-        });
-
-        partModelInput = document.getElementById('partModel');
-
-        function toggleListVisibility() {
-        document.getElementById('toggleList').classList.toggle('hidden');
-        }
-
-        partModelInput.addEventListener('click', toggleListVisibility);
-
-        document.getElementById('toggleList').classList.add('hidden');
-
-
-    // /////////////////////////
-
-
-        function addParameterToList() {
-        const partModel = partModelInput.value; // Update to use input value
-        const parameterName = document.getElementById('parameter_name').value;
-
-        if (partModel.trim() === '') {
-            return;
-        }
-
-        if (parameterName.trim() === '') {
-            return;
-        }
-
-        const listItem = document.createElement('li');
-        listItem.textContent = `${parameterName}`;
-
-        const modelListItem = document.getElementById(`${partModel}-item`);
-
-        if (!modelListItem) {
-            const modelListItem = document.createElement('li');
-            modelListItem.textContent = `${partModel}`;
-            modelListItem.id = `${partModel}-item`;
-            modelListItem.classList.add('toggle', 'model-toggle');
-
-            const nestedList = document.createElement('ul');
-            nestedList.appendChild(listItem);
-
-            modelListItem.appendChild(nestedList);
-
-            document.getElementById('toggleList').appendChild(modelListItem);
-
-            // Add click event listener to each model item
-            modelListItem.addEventListener('click', function() {
-            const nestedList = this.querySelector('ul');
-            nestedList.classList.toggle('active');
+  
+    // Add click event listener to each ul element
+    ulElements.forEach(ul => {
+        ul.addEventListener('click', function (event) {
+            // Remove background color from all ul elements
+            ulElements.forEach(element => {
+                element.style.backgroundColor = '';
             });
+  
+            // Set background color for the clicked ul element
+            this.style.backgroundColor = 'lightblue';  
+            
+        // Clear the parameter_name input field when a different ul is clicked
+        if (lastSelectedUL && lastSelectedUL !== this) {
+            document.getElementById('parameter_name').value = ''; // Clear parameter_name input field
+        }
+
+        lastSelectedUL = this; // Update the last selected UL reference
+
+  
+          // Hide all li elements within all ul elements
+          ulElements.forEach(element => {
+              element.querySelectorAll('li').forEach(li => {
+                  li.style.display = 'none';
+              });
+          });
+
+          // Show the li elements of the clicked ul
+          this.querySelectorAll('li').forEach(li => {
+              li.style.display = 'block';
+          });
+  
+  
+            // Check if the clicked element is an <li> inside the <ul>
+            if (event.target.tagName === 'LI') {
+                // Get the text content of the clicked li and set it in the input field
+                const selectedValue = event.target.textContent.trim();
+                document.getElementById('parameter_name').value = selectedValue;
+  
+  
+                // Remove background color from all li elements within all ul elements
+                ulElements.forEach(ulElement => {
+                    ulElement.querySelectorAll('li').forEach(li => {
+                        li.style.backgroundColor = '';
+                    });
+                });
+  
+                // Set background color for the clicked li
+                event.target.style.backgroundColor = 'red';
+            } else {
+                // Get the text content of the clicked ul excluding any <li> elements
+                const selectedValue = Array.from(this.childNodes)
+                    .filter(node => node.nodeName !== 'LI')
+                    .map(node => node.nodeType === 3 ? node.textContent.trim() : '') // Filter out non-text nodes
+                    .join(' ');
+  
+                document.getElementById('partModel').value = selectedValue;
+            }
+        });
+    });
+  
+    function saveValues() {
+    // Retrieve values from various input fields
+    const partModelValue = document.getElementById('partModel').value.trim();
+    const parameterNameValue = document.getElementById('parameter_name').value.trim();
+
+    // Use these values as needed, for example, log them to console
+    console.log('PART MODEL:', partModelValue);
+    console.log('PARAMETER NAME:', parameterNameValue);
+
+    // Send the parameterNameValue to the server using AJAX
+    const selectedUL = document.querySelector('.box-2 ul[style="background-color: lightblue;"]');
+
+    if (selectedUL) {
+        const inputValue = document.getElementById('parameter_name').value.trim();
+        const nestedLI = document.createElement('li');
+        nestedLI.textContent = inputValue;
+
+        // Create a new UL if there is no nested UL
+        if (!selectedUL.querySelector('ul')) {
+            const nestedUL = document.createElement('ul');
+            nestedUL.appendChild(nestedLI);
+            selectedUL.appendChild(nestedUL);
         } else {
-            const nestedList = modelListItem.querySelector('ul');
-            nestedList.appendChild(listItem);
+            selectedUL.querySelector('ul').appendChild(nestedLI);
         }
 
-        document.getElementById('parameter_name').value = '';
-        saveValues(); // Save the values after appending
+        // Display nested values
+        displayNestedValues(selectedUL);
+
+        // Send the parameterNameValue to the server using fetch
+        fetch('/parameter/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ parameterName: parameterNameValue }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response from the server
+            console.log('Server response:', data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        alert('Please select an UL element first.');
+    }
+}
+  
+
+  function displayNestedValues(selectedUL) {
+    const nestedValuesDisplay = document.getElementById('nestedValuesDisplay');
+
+    // Check if the element with id 'nestedValuesDisplay' exists
+    if (nestedValuesDisplay) {
+        nestedValuesDisplay.innerHTML = '';
+
+        if (selectedUL) {
+            const nestedUL = selectedUL.querySelector('ul');
+            if (nestedUL) {
+                const nestedItems = nestedUL.querySelectorAll('li');
+                nestedItems.forEach(item => {
+                    const nestedListItem = document.createElement('li');
+                    nestedListItem.textContent = item.textContent;
+                    nestedValuesDisplay.appendChild(nestedListItem);
+                });
+            }
         }
+    } else {
+        console.error("Element with id 'nestedValuesDisplay' not found.");
+    }
+}
+  
+///////////////////////////////////////////////////////////////
 
-///////////////////////////////////////
 
-function saveValues() {
-       // Retrieve values from input fields
-       const partModel = document.getElementById('partModel').value;
-    
-       // Check if the selected model matches the current iteration value
-           const parameterName = document.getElementById('parameter_name').value;
-           const parameterNo = document.getElementById('parameter_no').value;
-           const singleRadio = document.getElementById('single').checked;
-           const doubleRadio = document.getElementById('double').checked;
-           const probeNo = document.getElementById('probe_no').value;
-           const analogZero = document.getElementById('analog_zero').value;
-           const highMv = document.getElementById('high_mv').value;
-           const measurementMode = document.getElementById('measurement_mode').value;
-           const referenceValue = document.getElementById('reference_value').value;
-           const lowMv = document.getElementById('low_mv').value;
-           const nominal = document.getElementById('nominal').value;
-           const usl = document.getElementById('usl').value;
-           const lsl = document.getElementById('lsl').value;
-           const mastering = document.getElementById('mastering').value;
-           const stepNo = document.getElementById('step_no').value;
-    
-    
-           const parameter={
-            parameterName: parameterName,
-           };
-           // Create an object to store selected model values
-           const valuesToStore = {
-               partModel: partModel,
-               parameterNo: parameterNo,
-               singleRadio: singleRadio,
-               doubleRadio: doubleRadio,
-               probeNo: probeNo,
-               analogZero: analogZero,
-               highMv: highMv,
-               measurementMode: measurementMode,
-               referenceValue: referenceValue,
-               lowMv: lowMv,
-               nominal: nominal,
-               usl: usl,
-               lsl: lsl,
-               mastering: mastering,
-               stepNo: stepNo,
-           };
-               addParameterToList();
-           // Convert values to a JSON string and store in localStorage
-           localStorage.setItem('storedValues', JSON.stringify(valuesToStore));
-    
-           // Optionally, display a confirmation message
-           console.log('Values for selected model saved successfully:', valuesToStore);
-    }
-    
-    
-    
-    
-    
-    // this is used to only integer field::::::::
-    // Function to validate input and allow only integer values
-    function validateInteger(input) {
-       input.value = input.value.replace(/[^0-9 .]/g, ''); // Allow only digits (0-9)
-    }
-    
-    
-    
-       function handleRadioClick(option) {
-           // Get references to the input fields
-           var analogZeroInput = document.getElementById('analog_zero');
-           var highMvInput = document.getElementById('high_mv');
-           var referenceValueInput = document.getElementById('reference_value');
-           var lowMvInput = document.getElementById('low_mv');
-    
-           // Reset all fields to enabled
-           analogZeroInput.disabled = false;
-           highMvInput.disabled = false;
-           referenceValueInput.disabled = false;
-           lowMvInput.disabled = false;
-    
-           // Disable specific fields based on the radio button clicked
-           if (option === 'single') {
-               document.getElementById('high_mv').disabled = true;
-               document.getElementById('low_mv').disabled = true;
-           } else if (option === 'double') {
-               document.getElementById('analog_zero').disabled = true;
-               document.getElementById('reference_value').disabled = true;
-           }
-       }
+
+///////////////////////////////////////////////////////////////  
+  
+  
+  
+  //////////////////////////////////////////////////////////////////////////
+  
+  
+          
+          
+          // this is used to only integer field::::::::
+          // Function to validate input and allow only integer values
+          function validateInteger(input) {
+             input.value = input.value.replace(/[^0-9 .]/g, ''); // Allow only digits (0-9)
+          }
+          
+          
+          
+             function handleRadioClick(option) {
+                 // Get references to the input fields
+                 var analogZeroInput = document.getElementById('analog_zero');
+                 var highMvInput = document.getElementById('high_mv');
+                 var referenceValueInput = document.getElementById('reference_value');
+                 var lowMvInput = document.getElementById('low_mv');
+          
+                 // Reset all fields to enabled
+                 analogZeroInput.disabled = false;
+                 highMvInput.disabled = false;
+                 referenceValueInput.disabled = false;
+                 lowMvInput.disabled = false;
+          
+                 // Disable specific fields based on the radio button clicked
+                 if (option === 'single') {
+                     document.getElementById('high_mv').disabled = true;
+                     document.getElementById('low_mv').disabled = true;
+                 } else if (option === 'double') {
+                     document.getElementById('analog_zero').disabled = true;
+                     document.getElementById('reference_value').disabled = true;
+                 }
+             }
+          
+          
+          // Function to reset/clear input fields
+          function resetInputFields() { 
+              document.getElementById('parameter_name').value = '';
+              document.getElementById('analog_zero').value = '';
+              document.getElementById('high_mv').value = '';
+              document.getElementById('reference_value').value = '';
+              document.getElementById('low_mv').value = '';
+              document.getElementById('nominal').value = '';
+              document.getElementById('usl').value = '';
+              document.getElementById('lsl').value = '';
+              // ... (clear other input fields in a similar manner)
+          }
+          
+          // Event listener for the "Add New" button
+          document.getElementById('add-btn').addEventListener('click', function() {
+             resetInputFields(); // Clear the input fields when the button is clicked
+          });
+          
+          //////////////////////////
+          
+          
     
     
-    // Function to reset/clear input fields
-    function resetInputFields() {
-        document.getElementById('partModel').value = ''; 
-        document.getElementById('parameter_name').value = '';
-        document.getElementById('analog_zero').value = '';
-        document.getElementById('high_mv').value = '';
-        document.getElementById('reference_value').value = '';
-        document.getElementById('low_mv').value = '';
-        document.getElementById('nominal').value = '';
-        document.getElementById('usl').value = '';
-        document.getElementById('lsl').value = '';
-        // ... (clear other input fields in a similar manner)
-    }
-    
-    // Event listener for the "Add New" button
-    document.getElementById('add-btn').addEventListener('click', function() {
-       resetInputFields(); // Clear the input fields when the button is clicked
-    });
-    
-    //////////////////////////
-    
-    
-    window.onload = function() {
-       var srNoInput = document.getElementById('sr_no');
-       srNoInput.value = '1'; // Set the default value to 1
-    }
-    
-    document.getElementById('add-btn').addEventListener('click', function() {
-       autoIncrement();
-    });
-    
-    function autoIncrement() {
-       var srNoInput = document.getElementById('sr_no');
-       var currentValue = parseInt(srNoInput.value);
-    
-       // Check if the current value is a valid number
-       if (!isNaN(currentValue)) {
-           srNoInput.value = currentValue + 1; // Increment the value
-       } else {
-           srNoInput.value = 1; // If the value is not a number, start from 1
-       }
-    }
-    
-    
-    </script>
-    
-    
-    
-    {% endblock content %}
-    
-    
-    
+  
+  
+  
+  </script>   
+  
+  
+  {% endblock content %}
+  
+      
+      
+  

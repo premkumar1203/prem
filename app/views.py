@@ -14,6 +14,8 @@ from django.core.cache import cache
 from.models import probecalibration,SavedData
 from .models import TableOneData, TableTwoData, TableThreeData, TableFourData, TableFiveData
 from django.shortcuts import get_object_or_404
+from .models import paraname
+from django.views.decorators.http import require_POST
 
 import json
 
@@ -299,6 +301,34 @@ def trace(request, row_id=None):
 
 
 
+@csrf_exempt
 def parameter(request):
-    return render(request, 'app/parameter.html')
+    if request.method == 'GET':
+        try:
+            # Fetch stored data for tableBody-1 from your database or any storage mechanism
+            # Replace this with your actual logic to fetch data for tableBody-1
+            table_body_1_data = TableOneData.objects.all() 
+            # Pass the retrieved data for tableBody-1 to the template for rendering
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+        
+    elif request.method == 'POST':
+        try:
+            # Assuming you are expecting JSON data in the request body
+            data = json.loads(request.body)
+            parameter_name_value = data.get('parameterName', '')
+            print('your values is:',parameter_name_value)
+            # Process the parameter_name_value as needed
+            # For example, you can save it to the database or perform any other operations
+
+            value=paraname.objects.create(parameter_name=parameter_name_value)
+            value.save()
+
+            # Return a JSON response if needed
+            return JsonResponse({'message': 'Data received and processed successfully'})
+        except json.JSONDecodeError as e:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        
+    return render(request, 'app/parameter.html', {'table_body_1_data': table_body_1_data})
 

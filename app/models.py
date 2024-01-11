@@ -49,3 +49,15 @@ class SavedData(models.Model):
     field1 = models.CharField(max_length=100)
     field2 = models.IntegerField()
     # Add more fields as needed
+
+
+class SavedParameter(models.Model):
+    parameter_name = models.CharField(max_length=255)
+    part_model = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.parameter_name} - {self.part_model}"
+    
+class paraname(models.Model):
+    parameter_name = models.CharField(max_length=255)
+        
