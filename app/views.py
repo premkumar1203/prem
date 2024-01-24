@@ -14,7 +14,7 @@ from django.core.cache import cache
 from.models import probecalibration,SavedData
 from .models import TableOneData, TableTwoData, TableThreeData, TableFourData, TableFiveData
 from django.shortcuts import get_object_or_404
-from .models import paraname
+from .models import constvalue
 from django.views.decorators.http import require_POST
 
 import json
@@ -250,7 +250,7 @@ def trace(request, row_id=None):
         try:
             # Fetch stored data for tableBody-1 from your database or any storage mechanism
             # Replace this with your actual logic to fetch data for tableBody-1
-            table_body_1_data = TableOneData.objects.all()  # Replace YourTableModel with your actual model
+            table_body_1_data = TableOneData.objects.all()
             table_body_2_data = TableTwoData.objects.all()
             table_body_3_data = TableThreeData.objects.all()
             table_body_4_data = TableFourData.objects.all()
@@ -300,35 +300,44 @@ def trace(request, row_id=None):
 
 
 
-
 @csrf_exempt
 def parameter(request):
     if request.method == 'GET':
         try:
-            # Fetch stored data for tableBody-1 from your database or any storage mechanism
-            # Replace this with your actual logic to fetch data for tableBody-1
-            table_body_1_data = TableOneData.objects.all() 
-            # Pass the retrieved data for tableBody-1 to the template for rendering
-            
+            table_body_1_data = TableOneData.objects.all()
+            paraname = constvalue.objects.filter(model_id="kumar")
+
+
+            return render(request, 'app/parameter.html', {
+                'table_body_1_data': table_body_1_data,
+                'paraname': paraname,
+            })
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-        
+
+    
     elif request.method == 'POST':
         try:
-            # Assuming you are expecting JSON data in the request body
-            data = json.loads(request.body)
-            parameter_name_value = data.get('parameterName', '')
-            print('your values is:',parameter_name_value)
-            # Process the parameter_name_value as needed
-            # For example, you can save it to the database or perform any other operations
+            data = json.loads(request.body.decode('utf-8'))
+            print(f'Your values to get from frontend: {request.body}')
 
-            value=paraname.objects.create(parameter_name=parameter_name_value)
-            value.save()
+            model_id = data.get('modelId')
+            print('Model ID:', model_id)
 
-            # Return a JSON response if needed
-            return JsonResponse({'message': 'Data received and processed successfully'})
-        except json.JSONDecodeError as e:
-            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
-        
-    return render(request, 'app/parameter.html', {'table_body_1_data': table_body_1_data})
+            parameter_value = data.get('parameterValue')
+            print('Parameter Name:', parameter_value)
+            
 
+            # Create a ConstValue instance associated with the selected model
+            const_value_instance = constvalue.objects.create(model_id=model_id, parameter_name=parameter_value)
+            print("Your values in my server:", const_value_instance)    
+            const_value_instance.save()
+
+            
+
+            return JsonResponse({'success': True, 'message': 'Data saved successfully'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return render(request, 'app/parameter.html')

@@ -27,7 +27,13 @@ class TableOneData(models.Model):
     part_name = models.CharField(max_length=100)
     customer_name = models.CharField(max_length=100)
     part_model = models.CharField(max_length=100)
+    id = models.AutoField(primary_key=True)  # Ensure that 'id' is used as the primary key
     part_no = models.CharField(max_length=100)    
+
+class sonapariya(models.Model):
+    model = models.ForeignKey(TableOneData, on_delete=models.CASCADE)
+    parameter_name = models.CharField(max_length=100)
+
 
 class TableTwoData(models.Model):
     batch_no = models.CharField(max_length=100)
@@ -61,3 +67,21 @@ class SavedParameter(models.Model):
 class paraname(models.Model):
     parameter_name = models.CharField(max_length=255)
         
+class serverparameter(models.Model):
+    model_name = models.CharField(max_length=255)
+    parameter_name = models.CharField(max_length=255)
+
+class viewvalues(models.Model):
+    parameter_name = models.CharField(max_length=255)
+
+
+class kanish(models.Model):
+    model_name = models.ForeignKey(TableOneData, on_delete=models.CASCADE)
+    parameter_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.model_name.model_name} - {self.parameter_name}"    
+    
+class constvalue(models.Model):
+    model_id = models.CharField(max_length=255)
+    parameter_name = models.CharField(max_length=255)

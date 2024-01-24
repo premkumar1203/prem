@@ -98,7 +98,27 @@ Parameter Settings
             margin-left: 10px;
         }
 
+        .box-2 {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .model-list.selected {
+            background-color: lightskyblue; /* Set your desired background color for selected model */
+        }
+
+        .parameter-list {
+            display: none;
+        }
         
+        .parameter-list li.selected {
+            background-color: red;
+        }
+
+        .model-ul .nested-ul {
+            display: none;
+        }
+    
         
 </style>
 
@@ -208,171 +228,213 @@ Parameter Settings
 
 </div>
 
-<div class="box-2" id="model_name"style="overflow-x: auto;overflow-y:auto;">
+<div class="box-2" id="model_name">
     {% for data in table_body_1_data %}
-       <b> <ul>{{ data.part_model }}
-
-            
-        </ul></b>
+        <ul class="model-ul">
+            <li class="model-name" data-model-id="{{ data.model_id }}">{{ data.part_model }}</li>
+            <ul class="nested-ul">
+                    {% for item in paraname %}
+                        <li class="parameter">{{ item.parameter_name }}</li>
+                    {% endfor %}
+            </ul>
+        </ul>
     {% endfor %}
-    </div>
+</div>
+
+
 
 <script>
 
+///////////////////////////////////////////////////////////
 
-// Keep track of sr_no for each ul element
-
-let ulCounters = {};
-  
-
-    const ulElements = document.querySelectorAll('.box-2 ul');
-    let lastSelectedUL = null; // Store reference to the last selected UL
+let selectedModelId;
 
 
-  
-    // Add click event listener to each ul element
-    ulElements.forEach(ul => {
-        ul.addEventListener('click', function (event) {
-            // Remove background color from all ul elements
-            ulElements.forEach(element => {
-                element.style.backgroundColor = '';
-            });
-  
-            // Set background color for the clicked ul element
-            this.style.backgroundColor = 'lightblue';  
-            
-        // Clear the parameter_name input field when a different ul is clicked
-        if (lastSelectedUL && lastSelectedUL !== this) {
-            document.getElementById('parameter_name').value = ''; // Clear parameter_name input field
-        }
 
-        lastSelectedUL = this; // Update the last selected UL reference
+document.querySelectorAll('.model-name').forEach(model => {
+    model.addEventListener('click', function(event) {
+        const target = event.target;
+        const selectedModel = target.textContent.trim();
 
-  
-          // Hide all li elements within all ul elements
-          ulElements.forEach(element => {
-              element.querySelectorAll('li').forEach(li => {
-                  li.style.display = 'none';
-              });
-          });
+        const selectedUL = target.nextElementSibling;
+        const partModelInput = document.getElementById('partModel');
 
-          // Show the li elements of the clicked ul
-          this.querySelectorAll('li').forEach(li => {
-              li.style.display = 'block';
-          });
-  
-  
-            // Check if the clicked element is an <li> inside the <ul>
-            if (event.target.tagName === 'LI') {
-                // Get the text content of the clicked li and set it in the input field
-                const selectedValue = event.target.textContent.trim();
-                document.getElementById('parameter_name').value = selectedValue;
-  
-  
-                // Remove background color from all li elements within all ul elements
-                ulElements.forEach(ulElement => {
-                    ulElement.querySelectorAll('li').forEach(li => {
-                        li.style.backgroundColor = '';
-                    });
-                });
-  
-                // Set background color for the clicked li
-                event.target.style.backgroundColor = 'red';
-            } else {
-                // Get the text content of the clicked ul excluding any <li> elements
-                const selectedValue = Array.from(this.childNodes)
-                    .filter(node => node.nodeName !== 'LI')
-                    .map(node => node.nodeType === 3 ? node.textContent.trim() : '') // Filter out non-text nodes
-                    .join(' ');
-  
-                document.getElementById('partModel').value = selectedValue;
-            }
+        // Check if the selected model-ul already has the 'active' class
+        const isActive = selectedUL.classList.contains('active');
+
+        // Remove 'active' class and reset background for all models
+        document.querySelectorAll('.model-ul .nested-ul').forEach(ul => {
+            ul.classList.remove('active');
+            ul.style.display = 'none'; // hide all nested-ul
         });
+        document.querySelectorAll('.model-name').forEach(item => {
+            item.style.backgroundColor = '';
+        });
+
+        // If the selected model-ul was not active, toggle 'active' class, display nested-ul, and update UI
+        if (!isActive) {
+            // Toggle 'active' class for the clicked model and change background color
+            selectedUL.classList.toggle('active');
+            target.style.backgroundColor = 'lightblue';
+
+            // Display selected model name in the input field
+            partModelInput.value = selectedModel;
+
+            // Display the nested-ul for the selected model
+            selectedUL.style.display = 'block';
+        } else {
+            // If the selected model-ul was already active, hide nested-ul and clear input field
+            partModelInput.value = '';
+        }
     });
-  
-    function saveValues() {
-    // Retrieve values from various input fields
-    const partModelValue = document.getElementById('partModel').value.trim();
-    const parameterNameValue = document.getElementById('parameter_name').value.trim();
+});
 
-    // Use these values as needed, for example, log them to console
-    console.log('PART MODEL:', partModelValue);
-    console.log('PARAMETER NAME:', parameterNameValue);
+///////////////////////////////////////////////    
 
-    // Send the parameterNameValue to the server using AJAX
-    const selectedUL = document.querySelector('.box-2 ul[style="background-color: lightblue;"]');
+
+// Function to save values to the selected UL element
+// Function to save values to the selected UL element
+function saveValues() {
+    const selectedUL = document.querySelector('.model-ul .nested-ul.active');
+    const inputValue = document.getElementById('parameter_name').value.trim();
 
     if (selectedUL) {
-        const inputValue = document.getElementById('parameter_name').value.trim();
-        const nestedLI = document.createElement('li');
-        nestedLI.textContent = inputValue;
+        // Prepare data to be sent to the server
+        const data = {
+            modelId: selectedUL.parentElement.querySelector('.model-name').textContent.trim(),  // Assuming you have a variable tracking the selected model ID
+            parameterValue: inputValue,
+        };
 
-        // Create a new UL if there is no nested UL
-        if (!selectedUL.querySelector('ul')) {
-            const nestedUL = document.createElement('ul');
-            nestedUL.appendChild(nestedLI);
-            selectedUL.appendChild(nestedUL);
-        } else {
-            selectedUL.querySelector('ul').appendChild(nestedLI);
-        }
+        console.log('your data is :',data)
+        // Get CSRF token from the cookie (Django sets it in a cookie named 'csrftoken')
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)[1];
 
-        // Display nested values
-        displayNestedValues(selectedUL);
-
-        // Send the parameterNameValue to the server using fetch
-        fetch('/parameter/', {
-            method: 'POST',
+        // Perform AJAX POST request with CSRF token in headers
+        $.ajax({
+            type: 'POST',
+            url: '/parameter/',  // Adjust the URL based on your Django app's configuration
+            contentType: 'application/json',
+            data: JSON.stringify(data),
             headers: {
-                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
             },
-            body: JSON.stringify({ parameterName: parameterNameValue }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Handle the response from the server
-            console.log('Server response:', data);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    } else {
-        alert('Please select an UL element first.');
-    }
-}
-  
+            success: function (response) {
+                // Handle the success response from the server if needed
+                console.log('Data saved successfully:', response);
 
-  function displayNestedValues(selectedUL) {
-    const nestedValuesDisplay = document.getElementById('nestedValuesDisplay');
+                // Clear input field after successful save
+                document.getElementById('parameter_name').value = '';
 
-    // Check if the element with id 'nestedValuesDisplay' exists
-    if (nestedValuesDisplay) {
-        nestedValuesDisplay.innerHTML = '';
-
-        if (selectedUL) {
-            const nestedUL = selectedUL.querySelector('ul');
-            if (nestedUL) {
-                const nestedItems = nestedUL.querySelectorAll('li');
-                nestedItems.forEach(item => {
-                    const nestedListItem = document.createElement('li');
-                    nestedListItem.textContent = item.textContent;
-                    nestedValuesDisplay.appendChild(nestedListItem);
-                });
+                // Optionally, update the displayed parameters after saving
+                updateDisplayedParameters();
+            },
+            error: function (error) {
+                // Handle the error response from the server if needed
+                console.error('Error saving data:', error);
             }
-        }
+        });
+
+        modelParameters[selectedModelId] = response.updatedParameters;
+
+// Optionally, update the displayed parameters after saving
+updateDisplayedParameters();
     } else {
-        console.error("Element with id 'nestedValuesDisplay' not found.");
+        alert('Please select a model to add parameters.');
     }
 }
-  
+
+////////////////////////////////////////////////////////////////
+
+
+// Function to handle model selection (adjust according to your needs)
+function handleModelSelection(modelId) {
+    selectedModelId = modelId;
+    updateDisplayedParameters();
+}
+
+// Function to update displayed parameters based on the selected model
+function updateDisplayedParameters() {
+    // Use the selectedModelId to filter and display parameters
+    const parameters = modelParameters[selectedModelId];
+    const parameterList = document.getElementById('parameterList');
+
+    if (parameters) {
+        const parameterHTML = parameters.map(param => `<li class="parameter">${param}</li>`).join('');
+        parameterList.innerHTML = parameterHTML;
+    } else {
+        parameterList.innerHTML = '';
+    }
+}
+
 ///////////////////////////////////////////////////////////////
 
+$(document).ready(function () {
+    // Click event for model-list
+    $('.model-name').click(function () {
+        // Remove background color from all selected parameters
+        $('.nested-ul li.selected').css('background-color', '');
+
+        // Clear the input field
+        $('#parameter_name').val('');
+    });
+
+    // Click event for parameter list items
+    $('.nested-ul li').click(function () {
+        // Remove 'selected' class from all parameter list items
+        $('.nested-ul li').removeClass('selected').css('background-color', '');
+
+        // Add 'selected' class to the clicked parameter list item
+        $(this).addClass('selected');
+
+        // Update the input text with the selected parameter name
+        var selectedParameter = $(this).text();
+        $('#parameter_name').val(selectedParameter);
+
+        // Change the background color of the selected parameter to red
+        $(this).css('background-color', 'red');
+    });
+});
 
 
-///////////////////////////////////////////////////////////////  
+
+//////////////////////////////////////////////////////////////////////////  
+  
+// Add an object to store parameters for each model
+const modelParameters = {};
+
+// Function to handle model selection (adjust according to your needs)
+function handleModelSelection(modelId) {
+    selectedModelId = modelId;
+    updateDisplayedParameters();
+}
+
+// Function to update displayed parameters based on the selected model
+function updateDisplayedParameters() {
+    // Use the selectedModelId to filter and display parameters
+    const selectedUL = document.querySelector('.model-ul .nested-ul.active');
+    const parameterList = selectedUL.querySelector('.nested-ul');
+
+    // Fetch parameters for the selected model from the stored object
+    const parameters = modelParameters[selectedModelId];
+
+    if (parameters) {
+        // Clear existing parameter list
+        parameterList.innerHTML = '';
+
+        // Append new parameters to the list
+        parameters.forEach(param => {
+            const li = document.createElement('li');
+            li.className = 'parameter';
+            li.textContent = param;
+            parameterList.appendChild(li);
+        });
+    } else {
+        parameterList.innerHTML = '';
+    }
+}
   
   
-  
-  //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
   
   
           
