@@ -233,9 +233,9 @@ Parameter Settings
         <ul class="model-ul">
             <li class="model-name" data-model-id="{{ data.model_id }}">{{ data.part_model }}</li>
             <ul class="nested-ul">
-                    {% for item in paraname %}
-                        <li class="parameter">{{ item.parameter_name }}</li>
-                    {% endfor %}
+                {% for item in paraname %}
+                    <li>{{ item.parameter_name }}</li>
+                {% endfor %}
             </ul>
         </ul>
     {% endfor %}
@@ -245,11 +245,42 @@ Parameter Settings
 
 <script>
 
+/////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+
+
+
 ///////////////////////////////////////////////////////////
 
 let selectedModelId;
 
+// Keep track of the last selected model
+let lastSelectedModel = null;
 
+// Define the updateUI function
+function updateUI(data) {
+    // Implement the logic to update the UI with the data received
+    console.log('Updating UI with data:', data);
+
+    const filteredValuesContainer = document.querySelector('.model-ul .nested-ul.active');
+
+    // Clear previous content
+    filteredValuesContainer.innerHTML = '';
+
+    // Check if data is not empty
+    if (data && data.paraname && data.paraname.length > 0) {
+        data.paraname.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.textContent = item.parameter_name;
+            filteredValuesContainer.appendChild(listItem);
+        });
+    } else {
+        const listItem = document.createElement('li');
+        listItem.textContent = 'No parameters found for the selected model.';
+        filteredValuesContainer.appendChild(listItem);
+    }
+}
 
 document.querySelectorAll('.model-name').forEach(model => {
     model.addEventListener('click', function(event) {
@@ -259,33 +290,48 @@ document.querySelectorAll('.model-name').forEach(model => {
         const selectedUL = target.nextElementSibling;
         const partModelInput = document.getElementById('partModel');
 
-        // Check if the selected model-ul already has the 'active' class
-        const isActive = selectedUL.classList.contains('active');
-
-        // Remove 'active' class and reset background for all models
-        document.querySelectorAll('.model-ul .nested-ul').forEach(ul => {
-            ul.classList.remove('active');
-            ul.style.display = 'none'; // hide all nested-ul
-        });
-        document.querySelectorAll('.model-name').forEach(item => {
-            item.style.backgroundColor = '';
-        });
-
-        // If the selected model-ul was not active, toggle 'active' class, display nested-ul, and update UI
-        if (!isActive) {
-            // Toggle 'active' class for the clicked model and change background color
+        // If the clicked model is the same as the last selected model, toggle its active state
+        if (lastSelectedModel === target) {
             selectedUL.classList.toggle('active');
-            target.style.backgroundColor = 'lightblue';
-
-            // Display selected model name in the input field
-            partModelInput.value = selectedModel;
-
-            // Display the nested-ul for the selected model
-            selectedUL.style.display = 'block';
-        } else {
-            // If the selected model-ul was already active, hide nested-ul and clear input field
-            partModelInput.value = '';
+            selectedUL.style.display = selectedUL.classList.contains('active') ? 'block' : 'none';
+            return; // Do not proceed with fetching data and updating UI
         }
+
+        // Deactivate all other models
+        document.querySelectorAll('.model-name').forEach(otherModel => {
+            if (otherModel !== target) {
+                const otherUL = otherModel.nextElementSibling;
+                otherUL.classList.remove('active');
+                otherUL.style.display = 'none';
+            }
+        });
+
+        // Remove background color from the last selected model
+        if (lastSelectedModel) {
+            lastSelectedModel.style.backgroundColor = '';
+        }
+
+        // Update last selected model
+        lastSelectedModel = target;
+
+        // Activate the clicked model
+        selectedUL.classList.add('active');
+        target.style.backgroundColor = 'lightblue';
+
+        // Display selected model name in the input field
+        partModelInput.value = selectedModel;
+
+        // Display the nested-ul for the selected model
+        selectedUL.style.display = 'block';
+
+        // Make an AJAX request to the server with the selected model name
+        fetch(`/parameter/?model_name=${selectedModel}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update the UI with the filtered data
+                updateUI(data);
+            })
+            .catch(error => console.error('Error:', error));
     });
 });
 
@@ -334,10 +380,6 @@ function saveValues() {
             }
         });
 
-        modelParameters[selectedModelId] = response.updatedParameters;
-
-// Optionally, update the displayed parameters after saving
-updateDisplayedParameters();
     } else {
         alert('Please select a model to add parameters.');
     }
@@ -346,94 +388,38 @@ updateDisplayedParameters();
 ////////////////////////////////////////////////////////////////
 
 
-// Function to handle model selection (adjust according to your needs)
-function handleModelSelection(modelId) {
-    selectedModelId = modelId;
-    updateDisplayedParameters();
+
+function updateDisplayedParameters(data) {
+  // Assuming you have an element with the ID 'displayedParameters'
+  const displayedParametersElement = document.getElementById('displayedParameters');
+
+  if (displayedParametersElement) {
+    // Clear previous content
+    displayedParametersElement.innerHTML = '';
+
+    // Create and append new content based on the received data
+    const ul = document.createElement('ul');
+    data.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = `${item.name}: ${item.value}`;
+      ul.appendChild(li);
+    });
+
+    displayedParametersElement.appendChild(ul);
+  } else {
+    console.error('Element with ID "displayedParameters" not found.');
+  }
 }
 
-// Function to update displayed parameters based on the selected model
-function updateDisplayedParameters() {
-    // Use the selectedModelId to filter and display parameters
-    const parameters = modelParameters[selectedModelId];
-    const parameterList = document.getElementById('parameterList');
-
-    if (parameters) {
-        const parameterHTML = parameters.map(param => `<li class="parameter">${param}</li>`).join('');
-        parameterList.innerHTML = parameterHTML;
-    } else {
-        parameterList.innerHTML = '';
-    }
-}
 
 ///////////////////////////////////////////////////////////////
 
-$(document).ready(function () {
-    // Click event for model-list
-    $('.model-name').click(function () {
-        // Remove background color from all selected parameters
-        $('.nested-ul li.selected').css('background-color', '');
-
-        // Clear the input field
-        $('#parameter_name').val('');
-    });
-
-    // Click event for parameter list items
-    $('.nested-ul li').click(function () {
-        // Remove 'selected' class from all parameter list items
-        $('.nested-ul li').removeClass('selected').css('background-color', '');
-
-        // Add 'selected' class to the clicked parameter list item
-        $(this).addClass('selected');
-
-        // Update the input text with the selected parameter name
-        var selectedParameter = $(this).text();
-        $('#parameter_name').val(selectedParameter);
-
-        // Change the background color of the selected parameter to red
-        $(this).css('background-color', 'red');
-    });
-});
 
 
 
 //////////////////////////////////////////////////////////////////////////  
   
-// Add an object to store parameters for each model
-const modelParameters = {};
-
-// Function to handle model selection (adjust according to your needs)
-function handleModelSelection(modelId) {
-    selectedModelId = modelId;
-    updateDisplayedParameters();
-}
-
-// Function to update displayed parameters based on the selected model
-function updateDisplayedParameters() {
-    // Use the selectedModelId to filter and display parameters
-    const selectedUL = document.querySelector('.model-ul .nested-ul.active');
-    const parameterList = selectedUL.querySelector('.nested-ul');
-
-    // Fetch parameters for the selected model from the stored object
-    const parameters = modelParameters[selectedModelId];
-
-    if (parameters) {
-        // Clear existing parameter list
-        parameterList.innerHTML = '';
-
-        // Append new parameters to the list
-        parameters.forEach(param => {
-            const li = document.createElement('li');
-            li.className = 'parameter';
-            li.textContent = param;
-            parameterList.appendChild(li);
-        });
-    } else {
-        parameterList.innerHTML = '';
-    }
-}
-  
-  
+    
 //////////////////////////////////////////////////////////////////////////
   
   

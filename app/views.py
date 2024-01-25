@@ -304,19 +304,36 @@ def trace(request, row_id=None):
 def parameter(request):
     if request.method == 'GET':
         try:
-            table_body_1_data = TableOneData.objects.all()
-            paraname = constvalue.objects.filter(model_id="kumar")
 
+            table_body_1_data = TableOneData.objects.all()
+
+            # Dynamically filter constvalue objects based on the model_id parameter
+            model_id = request.GET.get('model_name')
+
+            print('your selected model from web page is:', model_id)
+
+            if model_id:
+                # Filter constvalue objects based on the model_id
+                paraname = constvalue.objects.filter(model_id=model_id).values('parameter_name')
+                print('your filtered values are:', paraname)
+
+                # Return filtered parameter names as JSON
+                return JsonResponse({'paraname': list(paraname)})
+            else:
+                paraname = []  # If no model is selected, set paraname to an empty list
 
             return render(request, 'app/parameter.html', {
                 'table_body_1_data': table_body_1_data,
                 'paraname': paraname,
+                'selected_model_id': model_id,
             })
+        
 
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            print(f'Exception: {e}')
+            return HttpResponse(f'Error: {str(e)}', status=500)
 
-    
+
     elif request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
