@@ -86,17 +86,18 @@ class constvalue(models.Model):
     model_id = models.CharField(max_length=255)
     parameter_name = models.CharField(max_length=255)
 
-class parameterValue(models.Model):
-    model_id = models.CharField(max_length=255)  # Assuming model_id is a character field
+
+class captvalues(models.Model):
+    model_id = models.CharField(max_length=255)
     parameter_name = models.CharField(max_length=255)
     single_radio = models.BooleanField(default=False)
+    analog_zero = models.FloatField(blank=True, null=True)
+    reference_value = models.FloatField(blank=True, null=True)
     double_radio = models.BooleanField(default=False)
+    high_mv = models.FloatField(blank=True, null=True)
+    low_mv = models.FloatField(blank=True, null=True)    
     probe_no = models.FloatField()
-    analog_zero = models.FloatField()
-    high_mv = models.FloatField()
     measurement_mode = models.CharField(max_length=50)
-    reference_value = models.FloatField()
-    low_mv = models.FloatField()
     nominal = models.FloatField()
     usl = models.FloatField()
     lsl = models.FloatField()
@@ -104,6 +105,5 @@ class parameterValue(models.Model):
     step_no = models.FloatField()
     hide_checkbox = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f'{self.model_id} -{self.parameter_name}'
-
+def __str__(self):
+        return f'{self.model_id} - {self.parameter_name}'

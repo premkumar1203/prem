@@ -14,7 +14,7 @@ from django.core.cache import cache
 from.models import probecalibration,SavedData
 from .models import TableOneData, TableTwoData, TableThreeData, TableFourData, TableFiveData
 from django.shortcuts import get_object_or_404
-from .models import constvalue
+from .models import captvalues
 from django.views.decorators.http import require_POST
 
 import json
@@ -314,7 +314,7 @@ def parameter(request):
 
             if model_id:
                 # Filter constvalue objects based on the model_id
-                paraname = constvalue.objects.filter(model_id=model_id).values('parameter_name')
+                paraname = captvalues.objects.filter(model_id=model_id).values('parameter_name')
                 print('your filtered values are:', paraname)
 
                 # Return filtered parameter names as JSON
@@ -332,29 +332,75 @@ def parameter(request):
         except Exception as e:
             print(f'Exception: {e}')
             return HttpResponse(f'Error: {str(e)}', status=500)
+        
 
+        
 
     elif request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
-            print(f'Your values to get from frontend: {request.body}')
+            print(f'Your values received from the frontend: {data}')
 
             model_id = data.get('modelId')
             print('Model ID:', model_id)
 
             parameter_value = data.get('parameterValue')
             print('Parameter Name:', parameter_value)
-            
 
-            # Create a ConstValue instance associated with the selected model
-            const_value_instance = constvalue.objects.create(model_id=model_id, parameter_name=parameter_value)
-            print("Your values in my server:", const_value_instance)    
+            # Handle radio button values
+            single_radio = data.get('singleRadio')
+            double_radio = data.get('doubleRadio')
+            if single_radio:
+                analog_zero = data.get('analogZero')
+                reference_value = data.get('referenceValue')
+                high_mv = None
+                low_mv = None
+            elif double_radio:
+                high_mv = data.get('highMV')
+                low_mv = data.get('lowMV')
+                analog_zero = None
+                reference_value = None
+
+            # Continue handling other values
+            probe_no = data.get('probeNo')
+            measurement_mode = data.get('measurementMode')
+            nominal = data.get('nominal')
+            usl = data.get('usl')
+            lsl = data.get('lsl')
+            mastering = data.get('mastering')
+            step_no = data.get('stepNo')
+            hide_checkbox = data.get('hideCheckbox')
+
+            # Create an instance of your model with the received values
+            const_value_instance = captvalues.objects.create(
+                model_id=model_id,
+                parameter_name=parameter_value,
+                single_radio=single_radio,
+                double_radio=double_radio,
+                analog_zero=analog_zero,
+                reference_value=reference_value,
+                high_mv=high_mv,
+                low_mv=low_mv,
+                probe_no=probe_no,
+                measurement_mode=measurement_mode,
+                nominal=nominal,
+                usl=usl,
+                lsl=lsl,
+                mastering=mastering,
+                step_no=step_no,
+                hide_checkbox=hide_checkbox
+            )
+
+            print("Your values in the server:", const_value_instance)
+            # Save the instance to the database
             const_value_instance.save()
-
-            
 
             return JsonResponse({'success': True, 'message': 'Data saved successfully'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
 
     return render(request, 'app/parameter.html')
+
+
+
+

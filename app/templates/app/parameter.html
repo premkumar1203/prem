@@ -338,20 +338,47 @@ document.querySelectorAll('.model-name').forEach(model => {
 ///////////////////////////////////////////////    
 
 
-// Function to save values to the selected UL element
-// Function to save values to the selected UL element
 function saveValues() {
     const selectedUL = document.querySelector('.model-ul .nested-ul.active');
     const inputValue = document.getElementById('parameter_name').value.trim();
+    const singleRadio = document.getElementById('single').checked;
+    const doubleRadio = document.getElementById('double').checked;
+    const probeNo = document.getElementById('probe_no').value;
+    const analogZero = document.getElementById('analog_zero').value;
+    const highMV = document.getElementById('high_mv').value;
+    const measurementMode = document.getElementById('measurement_mode').value;
+    const referenceValue = document.getElementById('reference_value').value;
+    const lowMV = document.getElementById('low_mv').value;
+    const nominal = document.getElementById('nominal').value;
+    const usl = document.getElementById('usl').value;
+    const lsl = document.getElementById('lsl').value;
+    const mastering = document.getElementById('mastering').value;
+    const stepNo = document.getElementById('step_no').value;
+    const hideCheckbox = document.getElementById('hide').checked;
 
     if (selectedUL) {
         // Prepare data to be sent to the server
         const data = {
             modelId: selectedUL.parentElement.querySelector('.model-name').textContent.trim(),  // Assuming you have a variable tracking the selected model ID
             parameterValue: inputValue,
+            singleRadio: singleRadio,
+            doubleRadio: doubleRadio,
+            probeNo: probeNo,
+            analogZero: analogZero,
+            highMV: highMV,
+            measurementMode: measurementMode,
+            referenceValue: referenceValue,
+            lowMV: lowMV,
+            nominal: nominal,
+            usl: usl,
+            lsl: lsl,
+            mastering: mastering,
+            stepNo: stepNo,
+            hideCheckbox: hideCheckbox
         };
 
-        console.log('your data is :',data)
+        console.log('your data is :', data);
+
         // Get CSRF token from the cookie (Django sets it in a cookie named 'csrftoken')
         const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)[1];
 
@@ -368,22 +395,22 @@ function saveValues() {
                 // Handle the success response from the server if needed
                 console.log('Data saved successfully:', response);
 
-                // Clear input field after successful save
+                // Clear input fields after successful save
                 document.getElementById('parameter_name').value = '';
+                // Clear other input fields
+                // ...
 
-                // Optionally, update the displayed parameters after saving
-                updateDisplayedParameters();
             },
             error: function (error) {
                 // Handle the error response from the server if needed
                 console.error('Error saving data:', error);
             }
         });
-
     } else {
         alert('Please select a model to add parameters.');
     }
 }
+
 
 ////////////////////////////////////////////////////////////////
 
