@@ -85,3 +85,25 @@ class kanish(models.Model):
 class constvalue(models.Model):
     model_id = models.CharField(max_length=255)
     parameter_name = models.CharField(max_length=255)
+
+class parameterValue(models.Model):
+    model_id = models.CharField(max_length=255)  # Assuming model_id is a character field
+    parameter_name = models.CharField(max_length=255)
+    single_radio = models.BooleanField(default=False)
+    double_radio = models.BooleanField(default=False)
+    probe_no = models.FloatField()
+    analog_zero = models.FloatField()
+    high_mv = models.FloatField()
+    measurement_mode = models.CharField(max_length=50)
+    reference_value = models.FloatField()
+    low_mv = models.FloatField()
+    nominal = models.FloatField()
+    usl = models.FloatField()
+    lsl = models.FloatField()
+    mastering = models.FloatField()
+    step_no = models.FloatField()
+    hide_checkbox = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.model_id} -{self.parameter_name}'
+
