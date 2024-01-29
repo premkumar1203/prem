@@ -94,104 +94,45 @@ def index(request):
 
 
 
-def probe1(request):
-    if request.method == 'POST':
-        probe_id = request.POST.get('probeId')
-        a_values = [float(value) for value in request.POST.getlist('a[]')]
-        a1_values = [float(value) for value in request.POST.getlist('a1[]')]
-        b_values = [float(value) for value in request.POST.getlist('b[]')]
-        b1_values = [float(value) for value in request.POST.getlist('b1[]')]
-        e_values = [float(value) for value in request.POST.getlist('e[]')]
-
-        print('THESE ARE THE DATA YOU WANT TO DISPLAY:', probe_id, a_values, a1_values, b_values, b1_values, e_values)
-
-        probe, created = probecalibration.objects.get_or_create(probe_id=probe_id)
-
-        probe.low_ref = a_values[0] if a_values else None
-        probe.low_count = a1_values[0] if a1_values else None
-        probe.high_ref = b_values[0] if b_values else None
-        probe.high_count = b1_values[0] if b1_values else None
-        probe.coefficent = e_values[0] if e_values else None
-
-        probe.save()
-
-
-    with serial_data_lock:
-        data_to_display = serial_data
-
-    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        # Split the serial data into 11 channels (A-K) using regular expressions
-        parts = re.split(r'([A-K])', data_to_display)
-        parts = [part for part in parts if part.strip()]  # Remove empty strings
-
-        # Create a dictionary to store data for each channel
-        channel_data = {}
-        for channel_id, part in zip(parts[0::2], parts[1::2]):
-            part = part.replace('+', '')
-            channel_data[channel_id] = part
-
-        # Return the channel data as JSON response
-        return JsonResponse({'serial_data': channel_data})
-
-    return render(request, 'app/probe/probe1.html', {'serial_data': data_to_display})
-
-
-def probe2(request):
-    if request.method == 'POST':
-        probe_id = request.POST.get('probeId')
-        a_values = [float(value) for value in request.POST.getlist('a[]')]
-        a1_values = [float(value) for value in request.POST.getlist('a1[]')]
-        b_values = [float(value) for value in request.POST.getlist('b[]')]
-        b1_values = [float(value) for value in request.POST.getlist('b1[]')]
-        e_values = [float(value) for value in request.POST.getlist('e[]')]
-
-        print('THESE ARE THE DATA YOU WANT TO DISPLAY:', probe_id, a_values, a1_values, b_values, b1_values, e_values)
-
-        probe, created = probecalibration.objects.get_or_create(probe_id=probe_id)
-
-        probe.low_ref = a_values[0] if a_values else None
-        probe.low_count = a1_values[0] if a1_values else None
-        probe.high_ref = b_values[0] if b_values else None
-        probe.high_count = b1_values[0] if b1_values else None
-        probe.coefficent = e_values[0] if e_values else None
-
-        probe.save()
-
-    with serial_data_lock:
-        data_to_display = serial_data
-
-    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
-        # Split the serial data into 11 channels (A-K) using regular expressions
-        parts = re.split(r'([A-K])', data_to_display)
-        parts = [part for part in parts if part.strip()]  # Remove empty strings
-
-        # Create a dictionary to store data for each channel
-        channel_data = {}
-        for channel_id, part in zip(parts[0::2], parts[1::2]):
-            part = part.replace('+', '')
-            channel_data[channel_id] = part
-
-        # Return the channel data as JSON response
-        return JsonResponse({'serial_data': channel_data})
-
-    return render(request, 'app/probe/probe2.html', {'serial_data': data_to_display})
-
-
-def probe3(request):
-    return render(request,'app/probe/probe3.html')
-def probe4(request):
-    return render(request,'app/probe/probe4.html')
-def probe5(request):
-    return render(request,'app/probe/probe5.html')
-
-
-def probe6(request):
-    paraname = captvalues.objects.all().values('nominal')
-    print('your values are:',paraname)  # If no model is selected, set paraname to an empty list
-    return render(request,'app/probe/probe6.html')
-
 def probe(request):
-    return render(request,'app/probe.html')
+    if request.method == 'POST':
+        probe_id = request.POST.get('probeId')
+        a_values = [float(value) for value in request.POST.getlist('a[]')]
+        a1_values = [float(value) for value in request.POST.getlist('a1[]')]
+        b_values = [float(value) for value in request.POST.getlist('b[]')]
+        b1_values = [float(value) for value in request.POST.getlist('b1[]')]
+        e_values = [float(value) for value in request.POST.getlist('e[]')]
+
+        print('THESE ARE THE DATA YOU WANT TO DISPLAY:', probe_id, a_values, a1_values, b_values, b1_values, e_values)
+
+        probe, created = probecalibration.objects.get_or_create(probe_id=probe_id)
+
+        probe.low_ref = a_values[0] if a_values else None
+        probe.low_count = a1_values[0] if a1_values else None
+        probe.high_ref = b_values[0] if b_values else None
+        probe.high_count = b1_values[0] if b1_values else None
+        probe.coefficent = e_values[0] if e_values else None
+
+        probe.save()
+
+    with serial_data_lock:
+        data_to_display = serial_data
+
+    if request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+        # Split the serial data into 11 channels (A-K) using regular expressions
+        parts = re.split(r'([A-K])', data_to_display)
+        parts = [part for part in parts if part.strip()]  # Remove empty strings
+
+        # Create a dictionary to store data for each channel
+        channel_data = {}
+        for channel_id, part in zip(parts[0::2], parts[1::2]):
+            part = part.replace('+', '')
+            channel_data[channel_id] = part
+
+        # Return the channel data as JSON response
+        return JsonResponse({'serial_data': channel_data})
+
+    return render(request, 'app/probe.html', {'serial_data': data_to_display})
 
 
 
@@ -469,3 +410,5 @@ def parameter(request):
     return render(request, 'app/parameter.html')
 
 
+def master(request):
+    return render(request,'app/master.html')
