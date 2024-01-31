@@ -154,7 +154,8 @@ def trace(request, row_id=None):
                             part_name=values[0],
                             customer_name=values[1],
                             part_model=values[2],
-                            part_no=values[3]
+                            part_no=values[3],
+                            is_selected=values[4]
                         )
                         table_data.save()
 

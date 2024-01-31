@@ -29,6 +29,8 @@ class TableOneData(models.Model):
     part_model = models.CharField(max_length=100)
     id = models.AutoField(primary_key=True)  # Ensure that 'id' is used as the primary key
     part_no = models.CharField(max_length=100)    
+    is_selected = models.BooleanField(default=False)  # This field represents the checkbox state
+
 
 class sonapariya(models.Model):
     model = models.ForeignKey(TableOneData, on_delete=models.CASCADE)
