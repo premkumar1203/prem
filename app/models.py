@@ -106,6 +106,7 @@ class captvalues(models.Model):
     mastering = models.FloatField()
     step_no = models.FloatField()
     hide_checkbox = models.BooleanField(default=False)
+    sr_no = models.IntegerField(default=0)
 
 def __str__(self):
         return f'{self.model_id} - {self.parameter_name}'
