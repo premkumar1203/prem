@@ -517,11 +517,21 @@ function calculateAndDisplayResult() {
 setInterval(calculateAndDisplayResult,0.5);
 
 
+
+// Define an array to store the probe IDs
+var probeIds = [];
+
+// Function to add probe IDs to the array
+function addProbeId(probeId) {
+    probeIds.push(probeId);
+}
+
 // Loop through each radio button to add event listeners
 for (let i = 1; i <= 14; i++) {
     const radioId = `radio-${i}`;
     document.getElementById(radioId).addEventListener('click', function () {
         setCurrentProbe(i);
+        addProbeId(`Probe-${i}`); // Add the probe ID to the array
     });
 }
 

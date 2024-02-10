@@ -82,6 +82,24 @@ Mastering Page
         display: flex;
         flex-wrap: wrap;
         }
+
+        #probe-A,
+        #probe-B,
+        #probe-C,
+        #probe-D,
+        #probe-E,
+        #probe-F,
+        #probe-G,
+        #probe-H,
+        #probe-I,
+        #probe-J,
+        #probe-K {
+            display: inline-block;
+            max-height: 100px;
+            width: 100px;
+            margin-right: 10px; 
+        }
+       
 </style>
 
 
@@ -117,7 +135,19 @@ Mastering Page
 
     <div style="border-bottom: 2px solid black; margin-top: 20px;"></div>
 
-
+   
+    <textarea id="probe-A"></textarea>
+    <textarea id="probe-B"></textarea>
+    <textarea id="probe-C"></textarea>
+    <textarea id="probe-D"></textarea>
+    <textarea id="probe-E"></textarea>
+    <textarea id="probe-F"></textarea>
+    <textarea id="probe-G"></textarea>
+    <textarea id="probe-H"></textarea>
+    <textarea id="probe-I"></textarea>
+    <textarea id="probe-J"></textarea>
+    <textarea id="probe-K"></textarea>
+    
 
     <div id="container-wrapper"></div>
 </div>
@@ -134,15 +164,49 @@ Mastering Page
         // Create radio button
         const radioButton = document.createElement('input');
         radioButton.type = 'radio';
+        radioButton.name ='radio-container';
         radioButton.id = 'container-' + i + '_radioButton';
         radioButton.style.marginLeft = '70px';
         radioButton.style.marginTop = '0px';
+        radioButton.addEventListener('change',function(){
+            if (this.checked){
+                console.log("selected radio button id:",this.id);
+                displayContainerValues(container);
+            }
+        })
         container.appendChild(radioButton);
         container.appendChild(document.createElement('br'));
 
+
+
+        function displayContainerValues(container, probeNo, nominal) {
+    // Now you have access to probeNo and nominal in this function
+
+
+    const inputs = container.querySelectorAll('.master_input');
+    const values = {};
+
+    inputs.forEach(input => {
+        values[input.id] = input.value;
+    });
+
+    const preElement = container.querySelector('pre');
+    const preValue = preElement ? preElement.textContent.trim() : '';
+
+    values['preValue'] = preValue;
+    values['probeNo'] = probeNo;
+    values['nominal'] = nominal;
+
+    console.log("Container values:", values);
+}
+
+
+
+        
+
         // Create L: input fields
         container.appendChild(document.createTextNode('L:'));
-        for (let j = 1; j <= 2; j++) {
+        for (let j = 1; j <= 1; j++) {
             const inputL = document.createElement('input');
             inputL.className = 'master_input';
             inputL.type = 'text';
@@ -156,7 +220,7 @@ Mastering Page
 
         // Create H: input fields
         container.appendChild(document.createTextNode('H:'));
-        for (let k = 3; k <= 4; k++) {
+        for (let k = 2; k <= 2; k++) {
             const inputH = document.createElement('input');
             inputH.className = 'master_input';
             inputH.type = 'text';
@@ -166,6 +230,31 @@ Mastering Page
             // Add a small space after each inputL
             container.appendChild(document.createTextNode(' '));
         }
+
+        // Create additional input field
+        const additionalInput = document.createElement('input');
+        additionalInput.className = 'master_input';
+        additionalInput.type = 'text';
+        additionalInput.id = 'container-' + i + '_additional_input'; // Adjust ID as needed
+
+        // Append the additional input inside the container
+        container.appendChild(additionalInput);
+        container.appendChild(document.createTextNode(' ')); // Add a space after the additional input
+
+        // Append a line break to ensure proper layout
+        container.appendChild(document.createElement('br'));
+
+        // Style the additional input box using CSS
+        additionalInput.style.position = 'absolute';
+        additionalInput.style.top = '50%';
+        additionalInput.style.transform = 'translateY(-50%)';
+        additionalInput.style.height = '70px'; // Adjust height as needed
+        additionalInput.style.marginLeft = '5px'; // Adjust height as needed
+
+        // Style the container to position it relatively
+        container.style.position = 'relative';
+
+
 
         // Create pre element
         const preElement = document.createElement('pre');
@@ -181,108 +270,148 @@ Mastering Page
     }
 
 
+// Function to fetch and update values based on selected options
+function updateValues() {
+        var selectedValue = document.getElementById('partModel').value;
+        console.log('Selected Value: ' + selectedValue);
 
-
-
-
-    document.getElementById('select-btn').addEventListener('click', function () {
-    var selectedValue = document.getElementById('partModel').value;
-    console.log('Selected Value: ' + selectedValue);
-
-    var selectedMastering = document.getElementById('mastering').value;
-    console.log('Selected MASTERING GROUP:', selectedMastering);
-
-    // Make an AJAX request to the backend
-    fetch('/master/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token for Django
-        },
-        body: JSON.stringify({
-            selectedValue: selectedValue,
-            selectedMastering: selectedMastering,
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Extract parameter names from the response data
-        const parameter_names = data.parameter_names;
-
-        // Check if no values from selected mastering, then show alert message and remove parameter names from pre tags
-        if (!parameter_names || parameter_names.length === 0) {
-            alert('No parameter names available for selected mastering.');
-
-            // Clear all pre tags
-            for (let i = 1; i <= 50; i++) {
-                const preElement = document.getElementById('pre_' + i);
-                preElement.innerHTML = '';
-            }
-        } else {
-            // Iterate over the parameter names and update the corresponding pre tags
-            for (let i = 1; i <= parameter_names.length; i++) {
-                const preElement = document.getElementById('pre_' + i);
-                preElement.innerHTML = '<b style="color: red;">' + parameter_names[i - 1] + '</b>';
-            }
-            // Clear the remaining pre tags if there are fewer parameter names than the total number of pre tags
-            for (let i = parameter_names.length + 1; i <= 50; i++) {
-                const preElement = document.getElementById('pre_' + i);
-                preElement.innerHTML = '';
-            }
-        }
-
-        // Reset previous low_mv values
-        for (let i = 1; i <= 50; i++) {
-            const inputLowMV = document.getElementById('container-' + i + '_input1');
-            inputLowMV.value = '';
-        }
-
-        // Reset previous high_mv values
-        for (let i = 1; i <= 50; i++) {
-            const inputHighMV = document.getElementById('container-' + i + '_input3');
-            inputHighMV.value = '';
-        }
-
-        // Extract low_mv values from the response data
-        const low_mv_values = data.low_mv;
-
-        // Extract high_mv values from the response data
-        const high_mv_values = data.high_mv;
-
-        // Check if low_mv values are available and update input fields
-        if (low_mv_values && low_mv_values.length > 0) {
-            for (let i = 1; i <= low_mv_values.length; i++) {
-                const inputLowMV = document.getElementById('container-' + i + '_input1');
-                inputLowMV.value = low_mv_values[i - 1];
-            }
-        } else {
-            console.error('No or empty low_mv values received from the backend.');
-        }
-
-        // Check if high_mv values are available and update input fields
-        if (high_mv_values && high_mv_values.length > 0) {
-            for (let i = 1; i <= high_mv_values.length; i++) {
-                const inputHighMV = document.getElementById('container-' + i + '_input3');
-                inputHighMV.value = high_mv_values[i - 1];
-            }
-        } else {
-            console.error('No or empty high_mv values received from the backend.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-});
-
-////////////////////////////////////////
-
-
-document.getElementById('mastering').addEventListener('change', function () {
-        var selectedMastering = this.value;
+        var selectedMastering = document.getElementById('mastering').value;
         console.log('Selected MASTERING GROUP:', selectedMastering);
+
+        // Make an AJAX request to the backend
+        fetch('/master/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token for Django
+            },
+            body: JSON.stringify({
+                selectedValue: selectedValue,
+                selectedMastering: selectedMastering,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const probeNo = data.probe_no;
+            console.log('probe no:',probeNo)
+
+            const nominal = data.nominal;
+            console.log('nominal:',nominal)
+
+            // Extract parameter names from the response data
+            const parameter_names = data.parameter_names;
+
+            // Check if no values from selected mastering, then show alert message and remove parameter names from pre tags
+            if (!parameter_names || parameter_names.length === 0) {
+                alert('No parameter names available for selected mastering.');
+
+                // Clear all pre tags
+                for (let i = 1; i <= 50; i++) {
+                    const preElement = document.getElementById('pre_' + i);
+                    preElement.innerHTML = '';
+                }
+            } else {
+                // Iterate over the parameter names and update the corresponding pre tags
+                for (let i = 1; i <= parameter_names.length; i++) {
+                    const preElement = document.getElementById('pre_' + i);
+                    preElement.innerHTML = '<b style="color: red;">' + parameter_names[i - 1] + '</b>';
+                }
+                // Clear the remaining pre tags if there are fewer parameter names than the total number of pre tags
+                for (let i = parameter_names.length + 1; i <= 50; i++) {
+                    const preElement = document.getElementById('pre_' + i);
+                    preElement.innerHTML = '';
+                }
+            }
+
+
+
+
+            
+            for (let i = 1; i <= 50; i++) {
+    const container = document.getElementById('container-' + i);
+
+    // Assuming data.probe_no and data.nominal are arrays from the backend response
+    const probeNo = data.probe_no[i - 1];
+    const nominal = data.nominal[i - 1];
+
+    // Create elements to display probeNo and nominal in the container
+    const probeNoElement = document.createElement('p');
+    probeNoElement.textContent = 'Probe No: ' + probeNo;
+    probeNoElement.style.display = 'none';
+    container.appendChild(probeNoElement);
+
+    const nominalElement = document.createElement('p');
+    nominalElement.textContent = 'Nominal: ' + nominal;
+    nominalElement.style.display = 'none';
+    container.appendChild(nominalElement);
+
+
+    // Attach event listener to radio button in the container
+    const radioButton = container.querySelector('input[type="radio"]');
+    radioButton.addEventListener('change', function () {
+        // If the radio button is selected, get and display probeNo and nominal in the console
+        if (radioButton.checked) {
+            const selectedProbeNo = probeNo;
+            const selectedNominal = nominal;
+
+            displayContainerValues(container, selectedProbeNo, selectedNominal);
+        }
     });
+}
 
 
+
+
+
+            // Reset previous low_mv values
+            for (let i = 1; i <= 50; i++) {
+                const inputLowMV = document.getElementById('container-' + i + '_input1');
+                inputLowMV.value = '';
+            }
+
+            // Reset previous high_mv values
+            for (let i = 1; i <= 50; i++) {
+                const inputHighMV = document.getElementById('container-' + i + '_input2');
+                inputHighMV.value = '';
+            }
+
+            // Extract low_mv values from the response data
+            const low_mv_values = data.low_mv;
+            console.log('low_mv_values no:',low_mv_values)
+            // Extract high_mv values from the response data
+            const high_mv_values = data.high_mv;
+            console.log('high_mv_values no:',high_mv_values)
+
+            // Check if low_mv values are available and update input fields
+            if (low_mv_values && low_mv_values.length > 0) {
+                for (let i = 1; i <= low_mv_values.length; i++) {
+                    const inputLowMV = document.getElementById('container-' + i + '_input1');
+                    inputLowMV.value = low_mv_values[i - 1];
+                }
+            } else {
+                console.error('No or empty low_mv values received from the backend.');
+            }
+
+            // Check if high_mv values are available and update input fields
+            if (high_mv_values && high_mv_values.length > 0) {
+                for (let i = 1; i <= high_mv_values.length; i++) {
+                    const inputHighMV = document.getElementById('container-' + i + '_input2');
+                    inputHighMV.value = high_mv_values[i - 1];
+                }
+            } else {
+                console.error('No or empty high_mv values received from the backend.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Attach event listener to the partModel select element
+    document.getElementById('partModel').addEventListener('change', updateValues);
+
+    // Attach event listener to the mastering select element
+    document.getElementById('mastering').addEventListener('change', updateValues);
 
     // Function to get CSRF token from cookies
     function getCookie(name) {
@@ -301,10 +430,16 @@ document.getElementById('mastering').addEventListener('change', function () {
         return cookieValue;
     }
 
+    // Initial update when the page loads
+    updateValues();
 
 
-    
+/////////////////////////////////////////////
+ 
+
+
+///////////////////////////////////
+
 </script>
-
 
 {% endblock content %}

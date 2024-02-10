@@ -162,7 +162,7 @@ Parameter Settings
         </label><br>
     
         <label for="probe_no">PROBE NO:</label>
-        <select id="probe_no" name="probe_no" oninput="validateInteger(this)">
+        <select id="probe_no" name="probe_no" oninput="validateInteger(this)" onchange="fetchProbeId(this.value)">
             <script>
                 for (var i = 1; i <= 11; i++) {
                     document.write('<option value="' + i + '">' + i + '</option>');
@@ -354,37 +354,7 @@ function updateUI(data) {
 
 // Rest of your existing code remains unchanged
 
-////////////////////////////////////////////////////////
 
-// Initially disable the input fields for "high m-v" and "low m-v"
-
-// Add event listeners to intercept input events
-document.getElementById('high_mv').addEventListener('input', function(event) {
-    if (!document.getElementById('double').checked) {
-        alert('Please select the "double" radio button first.');
-    }
-});
-
-document.getElementById('low_mv').addEventListener('input', function(event) {
-    if (!document.getElementById('double').checked) {
-        alert('Please select the "double" radio button first.');
-    }
-});
-
-document.getElementById('analog_zero').addEventListener('input', function(event) {
-    if (!document.getElementById('single').checked) {
-        alert('Please select the "single" radio button first.');
-    }
-});
-
-document.getElementById('reference_value').addEventListener('input', function(event) {
-    if (!document.getElementById('single').checked) {
-        alert('Please select the "single" radio button first.');
-    }
-});
-
-
-////////////////////////////////////////////////////////
 
 
 document.querySelectorAll('.model-name').forEach(model => {
@@ -484,7 +454,7 @@ function saveValues() {
 
 
      // Check if high_mv is less than or equal to low_mv (only if the double radio button is not checked)
-    if (!doubleRadio && parseFloat(highMV) <= parseFloat(lowMV)) {
+    if (highMV <= lowMV) {
         alert('Error: HIGH M-V should be greater than LOW M-V.');
         return; // Stop further processing
     }
@@ -593,7 +563,31 @@ function validateInteger(input) {
                      document.getElementById('reference_value').disabled = true;
                  }
              }
- 
+            document.getElementById('high_mv').addEventListener('input', function(event) {
+                if (!document.getElementById('double').checked) {
+                    alert('Please select the "double" radio button first.');
+                }
+            });
+
+            document.getElementById('low_mv').addEventListener('input', function(event) {
+                if (!document.getElementById('double').checked) {
+                    alert('Please select the "double" radio button first.');
+                }
+            });
+
+            document.getElementById('analog_zero').addEventListener('input', function(event) {
+                if (!document.getElementById('single').checked) {
+                    alert('Please select the "single" radio button first.');
+                }
+            });
+
+            document.getElementById('reference_value').addEventListener('input', function(event) {
+                if (!document.getElementById('single').checked) {
+                    alert('Please select the "single" radio button first.');
+                }
+            });
+
+
           
           
              function resetInputFields() {

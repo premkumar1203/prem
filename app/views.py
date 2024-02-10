@@ -114,6 +114,8 @@ def probe(request):
         probe.coefficent = e_values[0] if e_values else None
 
         probe.save()
+        
+        return redirect('master_page', probe_id=probe_id)
 
     with serial_data_lock:
         data_to_display = serial_data
@@ -324,9 +326,12 @@ def parameter(request):
             model_id = data.get('modelId')
             print('Model ID:', model_id)
 
-            # Extract sr_no from the data
             sr_no = data.get('srNo')
             print('SR_NO:', sr_no)
+
+            selected_probe_id = data.get('probeId')
+            print('Selected probe ID:', selected_probe_id)
+
 
             parameter_value = data.get('parameterValue')
             print('Parameter Name:', parameter_value)
@@ -465,6 +470,7 @@ def parameter(request):
     return render(request, 'app/parameter.html')
 
 
+
 def master(request):
     context = {}  
 
@@ -486,7 +492,13 @@ def master(request):
             # Extract necessary data from filtered_data
             parameter_names = [item['parameter_name'] for item in filtered_data]
             low_mv = [item['low_mv'] for item in filtered_data]
+            print('low values:',low_mv)
             high_mv = [item['high_mv'] for item in filtered_data]
+            print('high values:',high_mv)
+            probe_no = [item['probe_no'] for item in filtered_data]
+            print('probe no:',probe_no)
+            nominal = [item['nominal'] for item in filtered_data]
+            print('nominal:',nominal)
 
             response_data = {
                 'message': 'Successfully received the selected values.',
@@ -495,6 +507,8 @@ def master(request):
                 'low_mv': low_mv,
                 'high_mv': high_mv,
                 'mastering': selected_mastering,
+                'probe_no':probe_no,
+                'nominal':nominal,
             }
             return JsonResponse(response_data)
 
@@ -514,9 +528,12 @@ def master(request):
         except Exception as e:
             print(f'Exception: {e}')
             return JsonResponse({'key': 'value'})
+    
+    global serial_data
+    with serial_data_lock:
+        context['serial_data']=serial_data
 
     return render(request, 'app/master.html', context)
-
 
 
 
