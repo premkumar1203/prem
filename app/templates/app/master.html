@@ -130,8 +130,8 @@ Mastering Page
             }
         </script>
     </select>
-    <button  id="lowMasterBtn" type="button"><b>Low Mastering</b></button>
-    <button  id="highMasterBtn" type="button"><b>High Mastering</b></button>
+    <button id="lowMasterBtn" type="button" onclick="lowMasteringClick()"><b>Low Mastering</b></button>
+    <button id="highMasterBtn" type="button" onclick="highMasteringClick()"><b>High Mastering</b></button>
 
     <div style="border-bottom: 2px solid black; margin-top: 20px;"></div>
 
@@ -154,6 +154,26 @@ Mastering Page
 
 
 <script>
+
+
+
+function toggleContainerRadioButtons(show) {
+    const containerRadioButtons = document.querySelectorAll('[name="radio-container"]');
+    containerRadioButtons.forEach(radioButton => {
+        radioButton.style.display = show ? 'inline' : 'none';
+    });
+}
+
+// Event listener for the "Parameterwise" radio button
+document.getElementById('parameterwise').addEventListener('change', function() {
+    if (this.checked) {
+        toggleContainerRadioButtons(true); // Show container radio buttons
+    } else {
+        toggleContainerRadioButtons(false); // Hide container radio buttons
+    }
+});
+
+//////////////////////////////
     // Generate 50 input-box-container elements
     for (let i = 1; i <= 50; i++) {
         // Create a new container div
@@ -176,33 +196,263 @@ Mastering Page
         })
         container.appendChild(radioButton);
         container.appendChild(document.createElement('br'));
+        toggleContainerRadioButtons(false);
+
+         // Append container to the document body or any other container
+    document.body.appendChild(container);
 
 
+    let probeNo;
+let a1; // lowcount
+let b1; // highcount
+let callingFunction;
+let a; // low master
+let b; // high master
+let e; // nominal
+let d; // coeffiecient
+let o1; // offset
 
-        function displayContainerValues(container, probeNo, nominal) {
-    // Now you have access to probeNo and nominal in this function
+function displayContainerValues(container) {
 
-
+    
     const inputs = container.querySelectorAll('.master_input');
     const values = {};
 
     inputs.forEach(input => {
-        values[input.id] = input.value;
+        const inputName = mapInputIdToName(input.id);
+        values[inputName] = input.value;
     });
 
     const preElement = container.querySelector('pre');
     const preValue = preElement ? preElement.textContent.trim() : '';
 
     values['preValue'] = preValue;
-    values['probeNo'] = probeNo;
-    values['nominal'] = nominal;
+
+    // Rename keys as needed
+    a = values['low_mv'];
+    b = values['high_mv'];
+    e = values['nominal'];
 
     console.log("Container values:", values);
+    console.log("a:", a);
+    console.log("b:", b);
+    console.log("e:", e);
+
+    // Map probe numbers to corresponding textarea IDs
+    probeNo = values['probe_no']; // Assign value to the global probeNo
+
+    if (probeNo) {
+        const probeTextareaId = mapProbeToTextareaId(probeNo);
+        const probeTextarea = document.getElementById(probeTextareaId);
+
+        if (probeTextarea) {
+            const valueInTextarea = probeTextarea.value;
+            console.log('Value in textarea :', probeTextareaId);
+
+            // Save the value based on the calling function
+            if (callingFunction === 'lowMasteringClick') {
+                a1 = valueInTextarea;
+                console.log("Saving value as 'a1':", a1);
+            } else if (callingFunction === 'highMasteringClick') {
+                b1 = valueInTextarea;
+                console.log("Saving value as 'b1':", b1);
+
+                // Perform calculations and display the output
+                const c = b - a;
+                const c1 = b1 - a1;
+                d = c / c1; // Use the global 'd' variable instead of redeclaring
+                const o = parseFloat(e) + (a1 * d);
+                o1 = a - o; // Use the global 'o1' variable instead of redeclaring
+
+                console.log("c:", c);
+                console.log("c1:", c1);
+                console.log("d:", d);
+                console.log("o:", o);
+                console.log("offset value:", o1);
+            }
+        }
+    }
+}
+
+function lowMasteringClick() {
+    console.log("lowMasteringClick");
+    const container = getSelectedContainer();
+    callingFunction = 'lowMasteringClick';
+
+    displayContainerValues(container);
+
+    // Assuming 'a' is the value you want to display
+    const additionalInput = document.getElementById(container.id + '_additional_input');
+    if (additionalInput) {
+        additionalInput.value = a;  // Set the value of the additional input field
+    } else {
+        console.error('Additional input field not found for container:', container.id);
+    }
+}
+
+function highMasteringClick() {
+    console.log("highMasteringClick");
+    const container = getSelectedContainer(); 
+    callingFunction = 'highMasteringClick';
+  
+    displayContainerValues(container);
+
+    // Assuming 'm' is the value you want to display
+    updateAdditionalInputValue(m);
+}
+
+
+// Function to get the selected container
+function getSelectedContainer() {
+    const selectedRadio = document.querySelector('input[name="radio-container"]:checked');
+    if (selectedRadio) {
+        const containerId = selectedRadio.id.replace('_radioButton', ''); // Extract container ID from radio button ID
+        return document.getElementById(containerId);
+    }
+    return null;
+}   
+
+
+
+
+
+
+
+
+function mapInputIdToName(inputId) {
+    const idParts = inputId.split('_');
+    const inputType = idParts[idParts.length - 1];
+
+    switch (inputType) {
+        case 'input1':
+            return 'low_mv';
+        case 'input2':
+            return 'high_mv';
+        case 'input3':
+            return 'probe_no';
+        case 'input4':
+            return 'nominal';
+        default:
+            return inputType;
+    }
+}
+
+function mapProbeToTextareaId(probeNumber) {
+    const probeMap = {
+        '1': 'probe-A',
+        '2': 'probe-B',
+        '3': 'probe-C',
+        '4': 'probe-D',
+        '5': 'probe-E',
+        '6': 'probe-F',
+        '7': 'probe-G',
+        '8': 'probe-H',
+        '9': 'probe-I',
+        '10': 'probe-J',
+        '11': 'probe-K',
+
+    };
+   
+
+    return probeMap[probeNumber];
 }
 
 
 
-        
+
+
+
+let intervalId; // Variable to store the interval ID
+
+// Add an event listener to each radio button inside the containers
+document.querySelectorAll('input[name="radio-container"]').forEach(radioButton => {
+    radioButton.addEventListener('change', function() {
+        if (this.checked) {
+            const container = this.closest('.input-box-container');
+            displayContainerValues(container);
+            
+            // Clear the previous interval if exists
+            clearInterval(intervalId);
+
+            // Start a new interval to display serial data periodically
+            intervalId = setInterval(() => {
+                displaySerialData(container);
+            }, 5000); // Adjust the interval time (in milliseconds) as needed
+        }
+    });
+});
+
+function displaySerialData(container) {
+    const inputElements = container.querySelectorAll('.master_input');
+    const values = {};
+
+    inputElements.forEach(input => {
+        const inputName = mapInputIdToName(input.id);
+        values[inputName] = input.value;
+    });
+
+    
+
+    const probeInput = values['probe_no'];
+    const textareaId = mapProbeToTextareaId(probeInput);
+    const textarea = document.getElementById(textareaId);
+
+    
+
+    if (textarea) {
+        const serialData = textarea.value;
+        console.log(`Serial Data for Probe ${probeInput}:`, serialData);
+
+        calculateMastering(serialData);
+
+        // You can perform additional actions here with the serialData
+        // For example, processSerialData(serialData);
+    } else {
+        console.error('Textarea not found for Probe:', probeInput);
+    }
+}
+
+
+let m; // Declare the variable 'm' outside the function
+
+function calculateMastering(serialData) {
+    const rawMastering = parseFloat(e) + (serialData * d + o1);
+    
+    // Format the mastering value to 4 decimal places
+    m = rawMastering.toFixed(4); // Update the value of 'm' (remove 'const' to update the global variable)
+
+    console.log('Calculated Mastering:', m);
+
+    // Display the dynamically changing value in the addition box
+    updateAdditionalInputValue(m);
+
+    return m; // Return the value of 'm'
+}
+
+
+
+function updateAdditionalInputValue(value) {
+    // Assuming you have a function to get the selected container
+    const container = getSelectedContainer();
+    
+    // Assuming 'm' is the value you want to display
+    const additionalInput = document.getElementById(container.id + '_additional_input');
+    if (additionalInput) {
+        additionalInput.value = value;  // Set the value of the additional input field
+    } else {
+        console.error('Additional input field not found for container:', container.id);
+    }
+}
+
+
+
+
+
+
+
+
+
+
 
         // Create L: input fields
         container.appendChild(document.createTextNode('L:'));
@@ -244,6 +494,26 @@ Mastering Page
         // Append a line break to ensure proper layout
         container.appendChild(document.createElement('br'));
 
+
+
+        // Create additional PN: input field
+
+        for (let p = 3; p <= 4; p++) {  // Update the loop condition for additional input box
+            const inputPN = document.createElement('input');
+            inputPN.className = 'master_input';
+            inputPN.type = 'text';
+            inputPN.id = 'container-' + i + '_input' + p;
+            container.appendChild(inputPN);
+
+            inputPN.style.display = 'none';
+
+            // Add a small space after each inputPN
+            container.appendChild(document.createTextNode(' '));
+        }
+
+       
+
+
         // Style the additional input box using CSS
         additionalInput.style.position = 'absolute';
         additionalInput.style.top = '50%';
@@ -270,8 +540,10 @@ Mastering Page
     }
 
 
-// Function to fetch and update values based on selected options
-function updateValues() {
+
+
+    // Function to fetch and update values based on selected options
+    function updateValues() {
         var selectedValue = document.getElementById('partModel').value;
         console.log('Selected Value: ' + selectedValue);
 
@@ -292,12 +564,6 @@ function updateValues() {
         })
         .then(response => response.json())
         .then(data => {
-            const probeNo = data.probe_no;
-            console.log('probe no:',probeNo)
-
-            const nominal = data.nominal;
-            console.log('nominal:',nominal)
-
             // Extract parameter names from the response data
             const parameter_names = data.parameter_names;
 
@@ -323,45 +589,36 @@ function updateValues() {
                 }
             }
 
+////////////////////////////////////////////////////////////
 
 
 
-            
-            for (let i = 1; i <= 50; i++) {
-    const container = document.getElementById('container-' + i);
 
-    // Assuming data.probe_no and data.nominal are arrays from the backend response
-    const probeNo = data.probe_no[i - 1];
-    const nominal = data.nominal[i - 1];
+// Extract probeNo values from the response data
+const probeNo_values = data.probe_no;
+console.log('probeNo_values:', probeNo_values);
 
-    // Create elements to display probeNo and nominal in the container
-    const probeNoElement = document.createElement('p');
-    probeNoElement.textContent = 'Probe No: ' + probeNo;
-    probeNoElement.style.display = 'none';
-    container.appendChild(probeNoElement);
-
-    const nominalElement = document.createElement('p');
-    nominalElement.textContent = 'Nominal: ' + nominal;
-    nominalElement.style.display = 'none';
-    container.appendChild(nominalElement);
+// Extract nominal values from the response data
+const nominal_values = data.nominal;
+console.log('nominal_values:', nominal_values);
 
 
-    // Attach event listener to radio button in the container
-    const radioButton = container.querySelector('input[type="radio"]');
-    radioButton.addEventListener('change', function () {
-        // If the radio button is selected, get and display probeNo and nominal in the console
-        if (radioButton.checked) {
-            const selectedProbeNo = probeNo;
-            const selectedNominal = nominal;
+// Iterate over the probeNo values and update the corresponding input fields
+for (let i = 1; i <= Math.min(probeNo_values.length, 50); i++) {
+    const inputProbeNo = document.getElementById('container-' + i + '_input3'); // Assuming 'input2' is for probeNo
+    inputProbeNo.value = probeNo_values[i - 1];
+}
 
-            displayContainerValues(container, selectedProbeNo, selectedNominal);
-        }
-    });
+// Iterate over the nominal values and update the corresponding input fields
+for (let i = 1; i <= Math.min(nominal_values.length, 50); i++) {
+    const inputNominal = document.getElementById('container-' + i + '_input4'); // Assuming 'input3' is for nominal
+    inputNominal.value = nominal_values[i - 1];
 }
 
 
 
 
+/////////////////////////////////////////
 
             // Reset previous low_mv values
             for (let i = 1; i <= 50; i++) {
@@ -405,6 +662,7 @@ function updateValues() {
         .catch(error => {
             console.error('Error:', error);
         });
+        resetRadioButtons();
     }
 
     // Attach event listener to the partModel select element
@@ -434,11 +692,62 @@ function updateValues() {
     updateValues();
 
 
+function resetRadioButtons() {
+    const radioButtons = document.querySelectorAll('input[name="radio-container"]');
+    radioButtons.forEach(radioButton => {
+        radioButton.checked = false;
+    });
+}
+
+////////////////////////////////
+
+
+
+
+
+
+
 /////////////////////////////////////////////
  
+function updateSerialData() {
+    // Make an AJAX request to your Django view
+    $.ajax({
+        url: '/probe/',  // Replace with the correct URL
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            var serialData = data.serial_data;
+
+            // Iterate over the probe keys in serialData
+            for (var probeKey in serialData) {
+                if (serialData.hasOwnProperty(probeKey)) {
+                    // Update the corresponding textarea based on probeKey
+                    $('#probe-' + probeKey).text(serialData[probeKey]);
+                }
+            }
+
+            // Scroll the textarea to view the last line
+            $('.textarea').each(function () {
+                $(this).scrollTop($(this)[0].scrollHeight);
+            });
+        },
+        error: function(error) {
+          console.error('Error updating serial data:', error);
+        }
+    });
+}
+
+// Update the serial data every 1 second (adjust the interval as needed)
+setInterval(updateSerialData, 0.5); // Update every second (1000 ms)
 
 
 ///////////////////////////////////
+
+
+
+
+
+
 
 </script>
 
