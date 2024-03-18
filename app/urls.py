@@ -15,6 +15,8 @@ urlpatterns = [
     path('trace/',views.trace,name="trace"),
     path('master/',views.master,name="master"),
     path('parameter/',views.parameter,name="parameter"),
+    path('measurement/',views.measurement,name="measurement"),
+    path('measurebox/',views.measurebox,name="measurebox"),
     
 
 ]

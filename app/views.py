@@ -11,10 +11,10 @@ import threading
 import serial
 from django.views.decorators.csrf import csrf_exempt
 from django.core.cache import cache
-from.models import probecalibration,SavedData
+from.models import probecalibration,SavedData,contiValues
 from .models import TableOneData, TableTwoData, TableThreeData, TableFourData, TableFiveData
 from django.shortcuts import get_object_or_404
-from .models import captvalues
+from .models import captvalues,master,MasteringData,MasterData
 from django.views.decorators.http import require_POST
 
 import json
@@ -139,59 +139,126 @@ def probe(request):
 
 
 
+from django.http import JsonResponse, HttpResponse
+import json
+
 @csrf_exempt
 def trace(request, row_id=None):
     if request.method == 'POST':
         try:
             received_data = json.loads(request.body)
-            print(f'received_data',request.body)
+            print('received_data', received_data)
 
-            # Process received_data and save to the database for each table
-            for item_id, rows in received_data.items():
-                for row in rows:
-                    values = row['values']
+            if 'rowId' in received_data:
+                row_id = received_data['rowId']
+                print('row_id:', row_id)
 
-                    if item_id == 'tableBody-1':
-                        table_data = TableOneData.objects.create(
-                            part_name=values[0],
-                            customer_name=values[1],
-                            part_model=values[2],
-                            part_no=values[3],
-                            is_selected=values[4]
-                        )
-                        table_data.save()
+                table_body_id = received_data.get('tableBodyId')
+                print('your table_body_id is:',table_body_id)
+                values = received_data.get('values')
 
-                    elif item_id == 'tableBody-2':
-                        table_data = TableTwoData.objects.create(
-                            batch_no=values[0]
-                        )
-                        table_data.save()
+                if table_body_id and values:
+                    if table_body_id == 'tableBody-1':
+                        try:
+                            table_data = TableOneData.objects.get(pk=row_id)
+                            table_data.part_name = values[0]
+                            table_data.customer_name = values[1]
+                            table_data.part_model = values[2]
+                            table_data.part_no = values[3]
+                            table_data.is_selected = values[4]
+                            table_data.save()
+                            return JsonResponse({'message': 'Data updated successfully'}, status=200)
+                        except TableOneData.DoesNotExist:
+                            pass
+                    elif table_body_id == 'tableBody-2':
+                        try:
+                            table_data = TableTwoData.objects.get(pk=row_id)
+                            table_data.batch_no = values[0]
+                            table_data.save()
+                            return JsonResponse({'message': 'Data updated successfully'}, status=200)
+                        except TableTwoData.DoesNotExist:
+                            pass
+                    elif table_body_id == 'tableBody-3':
+                        try:
+                            table_data = TableThreeData.objects.get(pk=row_id)
+                            table_data.machine_no = values[0]
+                            table_data.machine_name = values[1]
+                            table_data.save()
+                            return JsonResponse({'message': 'Data updated successfully'}, status=200)
+                        except TableThreeData.DoesNotExist:
+                            pass
+                    elif table_body_id == 'tableBody-4':
+                        try:
+                            table_data = TableFourData.objects.get(pk=row_id)
+                            table_data.operator_no = values[0]
+                            table_data.operator_name = values[1]
+                            table_data.save()
+                            return JsonResponse({'message': 'Data updated successfully'}, status=200)
+                        except TableFourData.DoesNotExist:
+                            pass
+                    elif table_body_id == 'tableBody-5':
+                        try:
+                            table_data = TableFiveData.objects.get(pk=row_id)
+                            table_data.vendor_code = values[0]
+                            table_data.email = values[1]
+                            table_data.save()
+                            return JsonResponse({'message': 'Data updated successfully'}, status=200)
+                        except TableFiveData.DoesNotExist:
+                            pass
 
-                    elif item_id == 'tableBody-3':
-                        table_data = TableThreeData.objects.create(
-                            machine_no=values[0],
-                            machine_name=values[1]
-                        )
-                        table_data.save()
+                return JsonResponse({'message': 'Record with provided rowId does not exist'}, status=404)
 
-                    elif item_id == 'tableBody-4':
-                        table_data = TableFourData.objects.create(
-                            operator_no=values[0],
-                            operator_name=values[1]
-                        )
-                        table_data.save()
+            # Code to handle creation of new records
+            # This part of the code is based on your previous logic
+            # It will create new records if the 'rowId' is not provided in the received data
+            else:
+                if received_data:
+                    for item_id, rows in received_data.items():
+                        for row in rows:
+                            values = row['values']
+                            if item_id == 'tableBody-1':
+                                table_data = TableOneData.objects.create(
+                                    part_name=values[0],
+                                    customer_name=values[1],
+                                    part_model=values[2],
+                                    part_no=values[3],
+                                    is_selected=values[4]
+                                )
+                            elif item_id == 'tableBody-2':
+                                table_data = TableTwoData.objects.create(
+                                    batch_no=values[0]
+                                )
+                            elif item_id == 'tableBody-3':
+                                table_data = TableThreeData.objects.create(
+                                    machine_no=values[0],
+                                    machine_name=values[1]
+                                )
+                            elif item_id == 'tableBody-4':
+                                table_data = TableFourData.objects.create(
+                                    operator_no=values[0],
+                                    operator_name=values[1]
+                                )
+                            elif item_id == 'tableBody-5':
+                                table_data = TableFiveData.objects.create(
+                                    vendor_code=values[0],
+                                    email=values[1]
+                                )
+                            table_data.save()
 
-                    elif item_id == 'tableBody-5':
-                        table_data = TableFiveData.objects.create(
-                            vendor_code=values[0],
-                            email=values[1]
-                        )
-                        table_data.save()
+                    return JsonResponse({'message': 'New record(s) created successfully'}, status=201)
+                else:
+                    return JsonResponse({'message': 'No data provided'}, status=400)
 
-            return JsonResponse({'message': 'Data received and saved successfully'}, status=200)
+        except json.decoder.JSONDecodeError:
+            return JsonResponse({'message': 'Invalid JSON format'}, status=400)
 
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+
+
+
 
 
     elif request.method == 'GET':
@@ -214,36 +281,43 @@ def trace(request, row_id=None):
             received_data = json.loads(request.body)
 
             for item_id, row_ids in received_data.items():
+                print(f"Deleting rows with IDs {row_ids} from {item_id}")
+
+                # Depending on the item_id, fetch the rows from the database
                 if item_id == 'tableBody-1':
-                    TableOneData.objects.filter(id__in=row_ids).delete()
+                    rows = TableOneData.objects.filter(id__in=row_ids)
+
                 elif item_id == 'tableBody-2':
-                    TableTwoData.objects.filter(id__in=row_ids).delete()
+                    rows = TableTwoData.objects.filter(id__in=row_ids)
                 elif item_id == 'tableBody-3':
-                    TableThreeData.objects.filter(id__in=row_ids).delete()
+                    rows = TableThreeData.objects.filter(id__in=row_ids)
                 elif item_id == 'tableBody-4':
-                    TableFourData.objects.filter(id__in=row_ids).delete()
+                    rows = TableFourData.objects.filter(id__in=row_ids)
                 elif item_id == 'tableBody-5':
-                    TableFiveData.objects.filter(id__in=row_ids).delete()
+                    rows = TableFiveData.objects.filter(id__in=row_ids)
+
+                for row in rows:
+                    part_model_value = row.part_model  # Assuming 'part_model' is the field name
+                    delete = captvalues.objects.filter(model_id=part_model_value).delete()
+                    print(f"Deleted captvalues with model_id={delete}")
+
+                    print(f"Deleting row with ID: {row.id}, part_model value: {part_model_value}")
+
+
+                # Delete the rows
+                rows.delete()
 
             return JsonResponse({'message': 'Data deleted successfully'}, status=200)
 
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            print(f"Error deleting rows: {e}")
+            return JsonResponse({'error': 'Error deleting rows'}, status=500)
 
 
 
                                 
     else:
         return render(request, 'app/trace.html')
-
-
-
-
-
-
-
-            
-
 
 
 
@@ -298,6 +372,7 @@ def parameter(request):
                 return JsonResponse({'parameter_details': parameter_details})
 
             elif model_id:
+
                 # Filter constvalue objects based on the model_id
                 paraname = captvalues.objects.filter(model_id=model_id).values('parameter_name','id')
                 print('your filtered values are:', paraname)
@@ -434,6 +509,7 @@ def parameter(request):
             # Check if an ID is provided in the query parameters
             selected_id = request.GET.get('id')
             print('Selected ID:', selected_id)
+            
 
             if selected_id:
                 # Fetch the parameter details by ID
@@ -469,15 +545,61 @@ def parameter(request):
 
     return render(request, 'app/parameter.html')
 
+from datetime import datetime
+
+
 
 
 def master(request):
-    context = {}  
-
     if request.method == 'POST':
         try:
             # Retrieve the selected values from the request body
             data = json.loads(request.body.decode('utf-8'))
+
+            # Process the data as needed
+            probeNo = data.get('probeNo')
+            a = data.get('a')
+            b = data.get('b')
+            parameterName = data.get('parameterName')
+            selectedValue = data.get('selectedValue')
+            selectedMastering = data.get('selectedMastering')
+            date_time_str = data.get('dateTime')
+
+            
+
+            if None not in [probeNo, a, b, parameterName, selectedValue, selectedMastering, date_time_str]:
+
+                if date_time_str:
+                    # Parse the date and time string
+                    dateTime = datetime.strptime(date_time_str, "%m/%d/%Y, %I:%M:%S %p")
+
+                    # Create and save the instance
+                    probe_data_instance = contiValues(
+                        probe_no=probeNo,
+                        a=a,
+                        b=b,
+                        parameter_name=parameterName,
+                        selected_value=selectedValue,
+                        selected_mastering=selectedMastering,
+                        date_time=dateTime
+                    )
+                    probe_data_instance.save()
+                else:
+                    print("DateTime field is missing.")
+    
+            else:
+                print("Some required fields are missing or set to None.")
+
+            # Now, you can use the received data as required
+            print('Probe No:', probeNo)
+            print('a:', a)
+            print('b:', b)
+            print('Parameter Name:', parameterName)
+            print('selectedValue :',selectedValue)
+            print('selectedMastering :',selectedMastering)
+            print('dateTime:',date_time_str)
+
+            # Assuming you want to save the received data into your database
             selected_value = data.get('selectedValue')
             selected_mastering = data.get('selectedMastering')
             print('Selected values from the client side:', selected_value, selected_mastering)
@@ -492,14 +614,15 @@ def master(request):
             # Extract necessary data from filtered_data
             parameter_names = [item['parameter_name'] for item in filtered_data]
             low_mv = [item['low_mv'] for item in filtered_data]
-            print('low values:',low_mv)
             high_mv = [item['high_mv'] for item in filtered_data]
-            print('high values:',high_mv)
             probe_no = [item['probe_no'] for item in filtered_data]
-            print('probe no:',probe_no)
             nominal = [item['nominal'] for item in filtered_data]
-            print('nominal:',nominal)
+            usl = [item['usl'] for item in filtered_data]
+            print('usl values is:',usl)
+            lsl = [item['lsl'] for item in filtered_data]
+            print('lsl value is :',lsl)
 
+            
             response_data = {
                 'message': 'Successfully received the selected values.',
                 'selectedValue': selected_value,
@@ -507,18 +630,21 @@ def master(request):
                 'low_mv': low_mv,
                 'high_mv': high_mv,
                 'mastering': selected_mastering,
-                'probe_no':probe_no,
-                'nominal':nominal,
+                'probe_no': probe_no,
+                'nominal': nominal,
+                'lsl' : lsl,
+                'usl' :usl,
             }
-            return JsonResponse(response_data)
 
+            return JsonResponse(response_data)
+        
         except json.JSONDecodeError as e:
             return JsonResponse({'error': 'Invalid JSON format in the request body'}, status=400)
 
     elif request.method == 'GET':
         try:
             # Your initial queryset for part_model_values
-            part_model_values = captvalues.objects.values_list('model_id', flat=True).distinct()
+            part_model_values = TableOneData.objects.values_list('part_model', flat=True).distinct()
             print('part_model_values:', part_model_values)
 
             context = {
@@ -535,5 +661,70 @@ def master(request):
 
     return render(request, 'app/master.html', context)
 
+
+def measurement(request):
+    if request.method == 'GET':
+        part_model = request.GET.get('partModel', None)
+        operator = request.GET.get('operator', None)
+        machine = request.GET.get('machine', None)
+        shift = request.GET.get('shift', None)
+        hiddenTextarea = request.GET.get('hiddenTextarea', None)
+
+        # Your initial queryset for part_model_values
+        part_model_values = TableOneData.objects.values_list('part_model', flat=True).distinct()
+        print('part_model_values:', part_model_values)
+
+        if part_model:
+            customer_name_values = TableOneData.objects.filter(part_model=part_model).values_list('customer_name', flat=True).distinct()
+            if customer_name_values.exists():  # Check if queryset has any results
+                customer_name_values = customer_name_values[0]  # Access the first value
+
+
+        # Do something with the retrieved values, such as passing them to the template
+        context = {
+            'part_model': part_model,
+            'operator': operator,
+            'machine': machine,
+            'shift': shift,
+            'hidden-textarea': hiddenTextarea,
+            'part_model_values': part_model_values,
+            'customer_name_values':customer_name_values
+        }
+        print('context values are:',context)
+        return render(request, 'app/measurement.html', context)
+    else:
+        # Handle other request methods if needed
+        return HttpResponseNotAllowed(['GET'])
+
+
+def measurebox(request):
+    if request.method == 'GET':
+        try:
+            # Your initial queryset for part_model_values
+            part_model_values = TableOneData.objects.values_list('part_model', flat=True).distinct()
+            print('part_model_values:', part_model_values)
+
+            operator_values = TableFourData.objects.values_list('operator_name', flat=True).distinct()
+            print('operator_values:', operator_values)
+
+            batch_no_values = TableTwoData.objects.values_list('batch_no', flat=True).distinct()
+            print('operator_values:', batch_no_values)
+
+            machine_name_values = TableThreeData.objects.values_list('machine_name', flat=True).distinct()
+            print('operator_values:', machine_name_values)
+
+            
+            context = {
+                'part_model_values': part_model_values,
+                'operator_values': operator_values,
+                'batch_no_values': batch_no_values,
+                'machine_name_values': machine_name_values,
+                
+
+            }
+
+        except json.JSONDecodeError as e:
+            return JsonResponse({'error': 'Invalid JSON format in the request body'}, status=400)
+    return render(request,'app/measurebox.html',context)
 
 

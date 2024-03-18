@@ -1,5 +1,5 @@
 from django.contrib import admin
-from.models import viewvalues,kanish,constvalue,sonapariya,captvalues
+from.models import viewvalues,kanish,constvalue,sonapariya,captvalues,master,MasteringData,MasterData,contiValues
 from.models import probecalibration,TableOneData,TableTwoData,TableThreeData,TableFourData,TableFiveData,SavedData,SavedParameter,paraname
 # Register your models here.
 
@@ -17,5 +17,8 @@ admin.site.register(kanish)
 admin.site.register(constvalue)
 admin.site.register(captvalues)
 admin.site.register(sonapariya)
-
+admin.site.register(master)
+admin.site.register(MasteringData)
+admin.site.register(MasterData)
+admin.site.register(contiValues)
 

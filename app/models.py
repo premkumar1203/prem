@@ -88,6 +88,38 @@ class constvalue(models.Model):
     model_id = models.CharField(max_length=255)
     parameter_name = models.CharField(max_length=255)
 
+class master(models.Model):
+    parameter_name = models.CharField(max_length=100)
+    low_mv = models.FloatField()
+    high_mv = models.FloatField()
+    probe_no = models.IntegerField()
+    nominal = models.FloatField()
+    # Add other fields if necessary
+
+    def __str__(self):
+        return self.parameter_name    
+    
+class MasteringData(models.Model):
+    probe_no = models.IntegerField()
+    a = models.FloatField()
+    b = models.FloatField()
+    parameter_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"Probe No: {self.probe_no}, Parameter Name: {self.parameter_name}"    
+
+
+class MasterData(models.Model):
+    probe_no = models.CharField(max_length=100)
+    a = models.FloatField()
+    b = models.FloatField()
+    parameter_name = models.CharField(max_length=100)
+    selected_value = models.CharField(max_length=100)
+    selected_mastering = models.CharField(max_length=100)
+    date_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"Probe No: {self.probe_no}, Parameter Name: {self.parameter_name}, DateTime: {self.date_time}"
 
 class captvalues(models.Model):
     model_id = models.CharField(max_length=255)
@@ -110,3 +142,21 @@ class captvalues(models.Model):
 
 def __str__(self):
         return f'{self.model_id} - {self.parameter_name}'
+
+
+class contiValues(models.Model):
+    probe_no = models.CharField(max_length=100)
+    a = models.FloatField()
+    b = models.FloatField()
+    parameter_name = models.CharField(max_length=100)
+    selected_value = models.CharField(max_length=100)
+    selected_mastering = models.CharField(max_length=100)
+    date_time = models.CharField(max_length=30)  # Change to CharField
+
+    def save(self, *args, **kwargs):
+        if self.date_time:  # Format the date and time string with AM/PM information
+            self.date_time = self.date_time.strftime("%m/%d/%Y, %I:%M:%S %p")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Probe No: {self.probe_no}, Parameter Name: {self.parameter_name}, DateTime: {self.date_time}"
